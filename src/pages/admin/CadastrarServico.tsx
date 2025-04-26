@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { colorAzul, colorBranco } from '../../values/colors';
+import { colorAzul } from '../../values/colors';
 import servicoeRepository from '../../repositories/ServicoRepository';
 import Swal from 'sweetalert2';
 import { NumericFormat } from 'react-number-format';
+import { Servico } from '../../types/Servico';
+// import { Cliente } from '../../types/Cliente';
 
 const servicosDisponiveis = [
   "Limpeza Técnica",
@@ -22,20 +24,19 @@ const servicosDisponiveis = [
   "OUTRAS OPÇÕES"
 ];
 
-interface Servico {
-  tipo: string;
-  valor: string;
-  nomeCliente: string;
-}
-
 const CadastrarServico = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
   const [servico, setServico] = useState<Servico>({
+    id: '',
     tipo: '',
     valor: '',
-    nomeCliente: '',
+    cliente: {
+      id: '',
+      nome: '',
+      contatos: [],
+    }
   });
 
   useEffect(() => {
@@ -44,9 +45,10 @@ const CadastrarServico = () => {
         .then((servicoData) => {
           if (servicoData) {
             setServico({
+              id: servicoData.id,
               tipo: servicoData.tipo || '',
               valor: servicoData.valor || '',
-              nomeCliente: servicoData.nomeCliente || '',
+              cliente: servicoData.cliente || { id: '', nome: '', contatos: [] }
             });
           }
         })
@@ -60,6 +62,16 @@ const CadastrarServico = () => {
     setServico((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  };
+
+  const handleClienteNomeChange = (value: string) => {
+    setServico((prev) => ({
+      ...prev,
+      cliente: {
+        ...prev.cliente!,
+        nome: value,
+      },
     }));
   };
 
@@ -103,7 +115,6 @@ const CadastrarServico = () => {
         </h2>
 
         <form onSubmit={handleSubmit}>
-
           {/* Tipo do Serviço */}
           <div className="mt-4">
             <label>Tipo do Serviço:</label>
@@ -142,9 +153,9 @@ const CadastrarServico = () => {
             <label>Nome do Cliente:</label>
             <input
               type="text"
-              placeholder="Ex: João da Silva (Verificar se relaciona ao cliente)"
-              value={servico.nomeCliente}
-              onChange={(e) => handleChange('nomeCliente', e.target.value)}
+              placeholder="Ex: João da Silva"
+              value={servico.cliente?.nome || ''}
+              onChange={(e) => handleClienteNomeChange(e.target.value)}
               className="form-control mt-2"
               required
             />

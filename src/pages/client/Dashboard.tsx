@@ -1,5 +1,4 @@
 // src/pages/client/Dashboard.tsx
-import React from 'react';
 import { useUser } from '../../contexts/UserContext'; // Importando o hook customizado
 import { colorAzul, colorBranco } from '../../values/colors';
 import { useNavigate } from 'react-router-dom'; // Substituindo Link por useNavigate

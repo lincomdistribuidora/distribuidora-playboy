@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { colorAzul, colorBranco } from '../values/colors';
+import { colorBranco } from '../values/colors';
 
 const Header = () => {
   const location = useLocation();
-  const [isDark, setIsDark] = useState(false);
+  const [isDark ] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false); // Estado para controle do menu
 
   const toggleMenu = () => setMenuAberto(!menuAberto); // Alterna estado do menu
-  const toggleDarkMode = () => setIsDark(!isDark);
 
   const navLinks = [
     { to: '/', label: 'Home' },

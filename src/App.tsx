@@ -1,7 +1,6 @@
 // src/App.tsx
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { UserProvider } from './contexts/UserContext'; // Importando o UserProvider
+import { UserProvider } from './contexts/UserContext';
 import Header from './components/Header';
 import Home from './pages/public/Home';
 import Agendamento from './pages/public/Agendamento';
@@ -10,14 +9,12 @@ import Login from './pages/public/Login';
 import Dashboard from './pages/client/Dashboard';
 
 import DashboardServicos from './pages/admin/Servicos';
-import DashboardCadastrarServicos from './pages/admin/CadastrarServico'
+import DashboardCadastrarServicos from './pages/admin/CadastrarServico';
 
 import DashboardClientes from './pages/admin/Clientes';
 import DashboardCadastrarCliente from './pages/admin/CadastrarCliente ';
 
-
-
-import ProtectedRoute from './pages/protected/ProtectedRoute'; // Para proteção de rotas
+import ProtectedRoute from './pages/protected/ProtectedRoute';
 
 const App = () => {
   return (
@@ -46,7 +43,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path='/cadastrar-servicos'
             element={
@@ -63,12 +59,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
-
-
-
-
-
           <Route
             path='/clientes'
             element={
@@ -93,7 +83,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
         </Routes>
       </Router>
     </UserProvider>

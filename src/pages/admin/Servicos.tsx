@@ -21,13 +21,24 @@ const Servicos: React.FC = () => {
   const [filtro, setFiltro] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
 
-  const servicosPorPagina = 2;
+  const servicosPorPagina = 10;
 
   useEffect(() => {
     const fetchServicos = async () => {
       const lista = await ServicoRepository.findAll();
-      setServicos(lista);
+
+      // Mapeamento para garantir que os dados retornados tenham todos os campos necessários
+      const servicosCompletos: Servico[] = lista.map((servico: any) => ({
+        id: servico.id,
+        nome: servico.nome || '', // Adicionando valores padrão
+        nomeCliente: servico.cliente?.nome || '',
+        valor: servico.valor || '',
+        tipo: servico.tipo || '',
+      }));
+
+      setServicos(servicosCompletos);
     };
+
     fetchServicos();
   }, []);
 
@@ -155,7 +166,7 @@ const Servicos: React.FC = () => {
             >
               Anterior
             </button>
-            <div style={styles.scrollPaginacao}>
+            <div style={{ ...styles.scrollPaginacao, scrollbarWidth: 'thin', scrollbarColor: '#888 transparent' } as any}>
               {[...Array(totalPaginas)].map((_, i) => (
                 <button
                   key={i}
@@ -286,19 +297,22 @@ const styles = {
   scrollPaginacao: {
     display: 'flex',
     gap: 10,
-    overflowX: 'auto',
-    scrollbarWidth: 'thin', // Personalização do scroll para navegadores compatíveis
-    scrollbarColor: '#888 transparent',
+    overflowX: 'auto' as const, // Valor corrigido
+    // scrollbarWidth: 'thin', // Personalização do scroll para navegadores compatíveis
+    // scrollbarColor: '#888 transparent',
   },
-  scrollPaginacaoWebkit: {
-    height: 6, // Altura do scroll para navegadores baseados em Webkit
-  },
-  scrollPaginacaoThumb: {
-    backgroundColor: '#888',
+  botaoPaginacao: {
+    padding: '8px 16px',
+    fontSize: 14,
     borderRadius: 4,
+    border: '1px solid #ddd',
+    backgroundColor: '#f1f1f1',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
   },
-  scrollPaginacaoTrack: {
-    backgroundColor: 'transparent',
+  botaoAtivo: {
+    backgroundColor: '#007bff', // Cor do botão ativo
+    color: '#fff', // Cor do texto do botão ativo
   },
 };
 

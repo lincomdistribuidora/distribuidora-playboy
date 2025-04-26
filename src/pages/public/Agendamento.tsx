@@ -1,3 +1,4 @@
+// src/pages/public/Agendamento.tsx
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { colorAzul, colorBranco } from '../../values/colors';
@@ -45,6 +46,17 @@ Aguardo um retorno, ${data.nome}!`;
     window.open(whatsappURL, '_blank');
   };
 
+  // Funções para lidar com a opacidade no botão
+  const handleMouseOver = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.currentTarget as HTMLButtonElement; // Cast do tipo
+    target.style.opacity = '0.9';
+  };
+
+  const handleMouseOut = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.currentTarget as HTMLButtonElement; // Cast do tipo
+    target.style.opacity = '1';
+  };
+
   return (
     <div className="container mt-5" style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxWidth: '700px' }}>
       <h2 style={{ color: colorAzul, fontSize: '28px', fontWeight: 'bold', marginBottom: '20px' }}>📋 Agendar Serviço</h2>
@@ -57,7 +69,11 @@ Aguardo um retorno, ${data.nome}!`;
             placeholder="Digite seu nome..."
             style={{ fontSize: '16px', padding: '12px', borderRadius: '10px', border: '1px solid #ccc' }}
           />
-          {errors.nome && <p style={{ color: 'red', fontSize: '14px' }}>{errors.nome.message}</p>}
+          {errors.nome && errors.nome.message && (
+            <p style={{ color: 'red', fontSize: '14px' }}>
+              {errors.nome.message as string} {/* Garantir que message seja uma string */}
+            </p>
+          )}
         </div>
 
         <div className="mb-4">
@@ -104,8 +120,8 @@ Aguardo um retorno, ${data.nome}!`;
             border: 'none',
             transition: 'all 0.3s ease'
           }}
-          onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
-          onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+          onMouseOver={handleMouseOver}
+          onMouseOut={handleMouseOut}
         >
           💬 Enviar via WhatsApp
         </button>

@@ -1,8 +1,19 @@
-import React from 'react';
+// src/pages/public/ComoChegar.tsx
 import { colorAzul, colorBranco } from '../../values/colors';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 
 const ComoChegar = () => {
+  // Função para lidar com a mudança de cor ao passar o mouse
+  const handleMouseOver = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.target as HTMLAnchorElement;  // Cast para HTMLAnchorElement
+    target.style.backgroundColor = '#1b4c99';
+  };
+
+  const handleMouseOut = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.target as HTMLAnchorElement;  // Cast para HTMLAnchorElement
+    target.style.backgroundColor = colorAzul;
+  };
+
   return (
     <div className="d-flex justify-content-center align-items-center py-5" style={{ backgroundColor: '#f9f9f9', minHeight: '80vh' }}>
       <div
@@ -28,8 +39,8 @@ const ComoChegar = () => {
             fontSize: '1rem',
             transition: 'background-color 0.3s ease',
           }}
-          onMouseOver={e => (e.target.style.backgroundColor = '#1b4c99')}
-          onMouseOut={e => (e.target.style.backgroundColor = colorAzul)}
+          onMouseOver={handleMouseOver}
+          onMouseOut={handleMouseOut}
         >
           <FaMapMarkedAlt size={20} />
           Ver no Mapa
