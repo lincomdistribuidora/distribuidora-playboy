@@ -1,0 +1,374 @@
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-B55U8_cT.js
+(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))i(a);new MutationObserver(a=>{for(const l of a)if(l.type==="childList")for(const f of l.addedNodes)f.tagName==="LINK"&&f.rel==="modulepreload"&&i(f)}).observe(document,{childList:!0,subtree:!0});function n(a){const l={};return a.integrity&&(l.integrity=a.integrity),a.referrerPolicy&&(l.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?l.credentials="include":a.crossOrigin==="anonymous"?l.credentials="omit":l.credentials="same-origin",l}function i(a){if(a.ep)return;a.ep=!0;const l=n(a);fetch(a.href,l)}})();function sC(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Dg={exports:{}},Nu={};/**
+ * @license React
+ * react-jsx-runtime.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */var o0;function aC(){if(o0)return Nu;o0=1;var t=Symbol.for("react.transitional.element"),e=Symbol.for("react.fragment");function n(i,a,l){var f=null;if(l!==void 0&&(f=""+l),a.key!==void 0&&(f=""+a.key),"key"in a){l={};for(var d in a)d!=="key"&&(l[d]=a[d])}else l=a;return a=l.ref,{$$typeof:t,type:i,key:f,ref:a!==void 0?a:null,props:l}}return Nu.Fragment=e,Nu.jsx=n,Nu.jsxs=n,Nu}var l0;function oC(){return l0||(l0=1,Dg.exports=aC()),Dg.exports}var P=oC();const lC=()=>{};var u0={};/**
+ * @license
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\components\Combobox.tsx
+import React, { useState } from 'react';
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  options: Option[];
+  onChange: (value: string) => void;
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\components\FormularioCliente.tsx
+// src/components/FormularioCliente.tsx
+import React, { useState, useEffect } from 'react';
+import { colorAzul } from '../values/colors';
+
+interface Cliente {
+  id?: string;
+  nome: string;
+  contatos: { tipo: string; valor: string }[];
+  endereco?: string;
+  cidade?: string;
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\components\Header.tsx
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { colorBranco } from '../values/colors';
+
+const Header = () => {
+  const location = useLocation();
+  const [isDark ] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false); // Estado para controle do menu
+
+  const toggleMenu = () => setMenuAberto(!menuAberto); // Alterna estado do menu
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\contexts\UserContext.tsx
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+
+// Tipagem para o usuário
+interface User {
+  email: string | null;
+  uid: string | null;
+  displayName: string | null;
+}
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\CadastrarCliente .tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { colorAzul, colorBranco } from '../../values/colors';
+import ClienteRepository from '../../repositories/ClienteRepository';
+import Swal from 'sweetalert2';
+
+interface Contato {
+  tipo: string;
+  valor: string;
+}
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\CadastrarServico.tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { colorAzul } from '../../values/colors';
+import servicoeRepository from '../../repositories/ServicoRepository';
+import Swal from 'sweetalert2';
+import { NumericFormat } from 'react-number-format';
+import { Servico } from '../../types/Servico';
+// import { Cliente } from '../../types/Cliente';
+
+const servicosDisponiveis = [
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\Clientes.tsx
+import { useEffect, useState } from 'react';
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { colorAzul, colorBranco, colorVermelho } from '../../values/colors';
+import ClienteRepository from '../../repositories/ClienteRepository';
+import Swal from 'sweetalert2';
+import { Edit2, Trash2, Users } from 'lucide-react';
+
+// Define o tipo Cliente
+interface Contato {
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\EditarCliente.tsx
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import ClienteRepository from '../../repositories/ClienteRepository';
+import { Contato } from '../../types/Cliente';
+
+const EditarCliente = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [cliente, setCliente] = useState({
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\Servicos.tsx
+import React, { useEffect, useState } from 'react';
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { colorAzul, colorBranco, colorVermelho } from '../../values/colors';
+import ServicoRepository from '../../repositories/ServicoRepository';
+import Swal from 'sweetalert2';
+
+interface Servico {
+  id: string;
+  nome: string;
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\client\Dashboard.tsx
+// src/pages/client/Dashboard.tsx
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { FaUsers, FaCogs, FaSignOutAlt, FaBars } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { colorAzul, colorBranco } from '../../values/colors';
+import { useState } from 'react';
+
+const Dashboard = () => {
+  const { user, logout } = useUser();
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\protected\ProtectedRoute.tsx
+// src/pages/protected/ProtectedRoute.tsx
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
+
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useUser();
+
+  if (!user) {
+    // Se não estiver logado, redireciona para a página de login
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\public\Agendamento.tsx
+// src/pages/public/Agendamento.tsx
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
+import { FaCarSide, FaMotorcycle } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { colorAzul, colorBranco } from '../../values/colors';
+import { FaSpinner } from 'react-icons/fa'; // Ícone de spinner
+
+const servicosDisponiveis = [
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\public\ComoChegar.tsx
+// src/pages/public/ComoChegar.tsx
+import { colorAzul, colorBranco } from '../../values/colors';
+import { FaMapMarkedAlt } from 'react-icons/fa';
+
+const ComoChegar = () => {
+  // Função para lidar com a mudança de cor ao passar o mouse
+  const handleMouseOver = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.target as HTMLAnchorElement;  // Cast para HTMLAnchorElement
+    target.style.backgroundColor = '#1b4c99';
+  };
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\public\Home.tsx
+import { Link } from 'react-router-dom';
+import { colorAzul, colorBranco } from '../../values/colors';
+
+const Home = () => {
+  return (
+    <div style={{ backgroundColor: '#f7f9fc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem' }}>
+        <div style={{ textAlign: 'center', maxWidth: '800px' }}>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: colorAzul }}>
+            Bem-vindo aos <span style={{ color: '#0d6efd' }}>Serviços do Rômulo</span>
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\public\Login.tsx
+import Swal from 'sweetalert2';
+import React, { useState } from 'react';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
+import { colorAzul, colorBranco } from '../../values/colors';
+
+const Login = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('yuritakeo@ucl.br');
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\repositories\ClienteRepository.tsx
+import {
+  collection,
+  getDocs,
+  getDoc,
+  deleteDoc,
+  doc,
+  updateDoc
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import FirebaseService from '../services/FirebaseService';
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\repositories\ServicoRepository.tsx
+import {
+  collection,
+  getDocs,
+  getDoc,
+  deleteDoc,
+  doc,
+  updateDoc
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import FirebaseService from '../services/FirebaseService';
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\services\FirebaseService.tsx
+// firebase-service.ts
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig"; // Importando a instância de db configurada no firebase-config
+
+class FirebaseService {
+  // Função genérica para salvar dados em qualquer coleção do Firestore
+  async saveData(collectionName: string, data: any) {
+    try {
+      if (Array.isArray(data)) {
+        // Se for uma lista, salva todos os itens da lista
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\types\Cliente.ts
+export interface Contato {
+    tipo: string;
+    valor: string;
+  }
+  
+  export interface Endereco {
+    rua: string;
+    numero: string;
+    bairro: string;
+    cidade: string;
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\types\Servico.ts
+import { Cliente } from "./Cliente";
+
+export interface Servico {
+    id: string;
+    tipo: string;
+    valor: string;
+    cliente?: Cliente; // cliente pode ser undefined, mas NÃO null
+    criadoEm?: string;
+}
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\values\colors.tsx
+export const colorBranco = '#FFF';
+
+export const colorAzul = '#0D47A1E6';
+
+export const colorVermelho = '#F00';
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\App.tsx
+// src/App.tsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { UserProvider } from './contexts/UserContext';
+import Header from './components/Header';
+import Home from './pages/public/Home';
+import Agendamento from './pages/public/Agendamento';
+import ComoChegar from './pages/public/ComoChegar';
+import Login from './pages/public/Login';
+import Dashboard from './pages/client/Dashboard';
+
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\firebaseConfig.ts
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+// Configurações via .env
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\main.tsx
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './firebaseConfig';
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\vite-env.d.ts
+/// <reference types="vite/client" />
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\eslint.config.js
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+
+export default tseslint.config(
+  { ignores: ['dist'] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+
+---
+

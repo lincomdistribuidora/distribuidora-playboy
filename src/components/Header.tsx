@@ -55,6 +55,7 @@ const Header = () => {
                     backgroundColor: item.isButton ? '#ffc107' : 'transparent',
                     borderRadius: item.isButton ? '20px' : '0',
                     marginLeft: item.isButton ? '10px' : '0',
+                    marginTop: item.isButton ? '10px' : '0', 
                     padding: item.isButton ? '6px 15px' : '',
                     fontWeight: item.isButton ? '600' : 'normal',
                     transition: 'all 0.3s ease',

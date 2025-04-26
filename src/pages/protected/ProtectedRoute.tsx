@@ -8,7 +8,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (!user) {
     // Se não estiver logado, redireciona para a página de login
-    return <Navigate to='/login' />;
+    return <Navigate to='/' />;
   }
 
   return children;

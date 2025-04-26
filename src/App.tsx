@@ -1,4 +1,3 @@
-// src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import Header from './components/Header';
@@ -7,86 +6,43 @@ import Agendamento from './pages/public/Agendamento';
 import ComoChegar from './pages/public/ComoChegar';
 import Login from './pages/public/Login';
 import Dashboard from './pages/client/Dashboard';
+import PrivateLayout from './layouts/PrivateLayout'; // <-- Importa o novo Layout
+import ProtectedRoute from './pages/protected/ProtectedRoute'; // <-- Para proteger rotas
 
-import DashboardServicos from './pages/admin/Servicos';
-import DashboardCadastrarServicos from './pages/admin/CadastrarServico';
 
-import DashboardClientes from './pages/admin/Clientes';
-import DashboardCadastrarCliente from './pages/admin/CadastrarCliente ';
+import Clientes from './pages/admin/Clientes';
+import CadastrarCliente from './pages/admin/CadastrarCliente';
+import CadastrarServico from './pages/admin/CadastrarServico';
 
-import ProtectedRoute from './pages/protected/ProtectedRoute';
+import Servicos from './pages/admin/Servicos';
 
-const App = () => {
+function App() {
   return (
     <UserProvider>
       <Router>
-        <Header />
         <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/agendamento' element={<Agendamento />} />
-          <Route path='/como-chegar' element={<ComoChegar />} />
-          <Route path='/login' element={<Login />} />
 
-          <Route
-            path='/dashboard'
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/servicos'
-            element={
-              <ProtectedRoute>
-                <DashboardServicos />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/cadastrar-servicos'
-            element={
-              <ProtectedRoute>
-                <DashboardCadastrarServicos />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/cadastrar-servicos/:id'
-            element={
-              <ProtectedRoute>
-                <DashboardCadastrarServicos />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/clientes'
-            element={
-              <ProtectedRoute>
-                <DashboardClientes />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/cadastrar-clientes'
-            element={
-              <ProtectedRoute>
-                <DashboardCadastrarCliente />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/cadastrar-clientes/:id'
-            element={
-              <ProtectedRoute>
-                <DashboardCadastrarCliente />
-              </ProtectedRoute>
-            }
-          />
+          {/* Páginas Públicas */}
+          <Route path="/" element={<><Header /><Home /></>} />
+          <Route path="/agendamento" element={<><Header /><Agendamento /></>} />
+          <Route path="/como-chegar" element={<><Header /><ComoChegar /></>} />
+          <Route path="/login" element={<><Header /><Login /></>} />
+
+          {/* Páginas Privadas (Protegidas) */}
+          <Route element={<ProtectedRoute><PrivateLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Pode colocar outras privadas aqui também, tipo: */}
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/cadastrar-clientes" element={<CadastrarCliente />} />
+            
+            <Route path="/servicos" element={<Servicos />} />
+            <Route path="/cadastrar-servicos" element={<CadastrarServico />} />
+          </Route>
+
         </Routes>
       </Router>
     </UserProvider>
   );
-};
+}
 
 export default App;

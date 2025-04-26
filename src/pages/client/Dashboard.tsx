@@ -1,134 +1,79 @@
 // src/pages/client/Dashboard.tsx
-import { useUser } from '../../contexts/UserContext'; // Importando o hook customizado
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FaUsers, FaCogs, FaSignOutAlt } from 'react-icons/fa';
 import { colorAzul, colorBranco } from '../../values/colors';
-import { useNavigate } from 'react-router-dom'; // Substituindo Link por useNavigate
 
 const Dashboard = () => {
-  const { user, logout } = useUser(); // Acessa o usuário e a função de logout
-  const navigate = useNavigate(); // Hook de navegação
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
+
+  const menuOptions = [
+    {
+      label: 'Clientes',
+      icon: <FaUsers size={22} />,
+      onClick: () => navigate('/clientes', { replace: true }),
+    },
+    {
+      label: 'Serviços',
+      icon: <FaCogs size={22} />,
+      onClick: () => navigate('/servicos', { replace: true }),
+    },
+  ];
 
   return (
-    <div className='menu-responsivel'>
-      <div className="container mt-5" style={{ backgroundColor: '#F5F5F5' }}>
-        <h1 style={{ color: colorAzul }}>
-          Bem-vindo, {user?.displayName || user?.email || 'Usuário desconhecido'}!
-        </h1>
-        {/* <div className="mt-4">
-          <button
-            // onClick={() => navigate('/vendas', { replace: true })}
+    <div className="container mt-5" style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxWidth: '700px' }}>
+      <h1 style={{ color: colorAzul, fontSize: '26px', fontWeight: 'bold', marginBottom: '30px' }}>
+        👋 Bem-vindo, {user?.displayName || user?.email || 'Usuário'}!
+      </h1>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {menuOptions.map((option, index) => (
+          <motion.button
+            key={index}
+            onClick={option.onClick}
+            whileTap={{ scale: 0.95 }}
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
               backgroundColor: colorAzul,
               color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Vendas/Serviços
-          </button>
-        </div> 
+              fontSize: '18px',
+              padding: '12px 20px',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            {option.icon}
+            {option.label}
+          </motion.button>
+        ))}
 
-        <div className="mt-4">
-          <button
-            // onClick={() => navigate('/agendamentos', { replace: true })}
-            style={{
-              backgroundColor: colorAzul,
-              color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Agendamentos
-          </button>
-        </div>
-
-        */}
-
-        <div className="mt-4">
-          <button
-            onClick={() => navigate('/clientes', { replace: true })}
-            style={{
-              backgroundColor: colorAzul,
-              color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Clientes
-          </button>
-        </div>
-
-        {/* 
-        <Link to='/agendamento' className='btn' style={{ backgroundColor: colorAzul, color: colorBranco }}>
-          Agende sua lavagem
-        </Link>
-        */}
-
-        <div className="mt-4">
-          <button
-            onClick={() => navigate('/servicos', { replace: true })}
-            style={{
-              backgroundColor: colorAzul,
-              color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Serviços
-          </button>
-        </div>
-
-        {/* <div className="mt-4">
-          <button
-            // onClick={() => navigate('/estoque', { replace: true })}
-            style={{
-              backgroundColor: colorAzul,
-              color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Estoque
-          </button>
-        </div> */}
-
-        {/* 
-        <div className="mt-4">
-          <button className="btn btn-primary">Gráficos entre outros...</button>
-        </div>
-
-        btn-default, btn-primary, btn-success, btn-warning, btn-danger, e btn-link      
-        */}
-
-        {/*  Dentro de veículo
-
-        <div className="mt-3">
-          <button className="btn btn-secondary">Cadastrar Veículo</button>
-        </div> 
-
-        Ver todos veículos (opção para edição e exclusão)
-        */}
-
-        {/* <div className="mt-4">
-          <button
-            // onClick={() => navigate('/despesas', { replace: true })}
-            style={{
-              backgroundColor: colorAzul,
-              color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Despesas
-          </button>
-        </div> */}
-
-        <div className="mt-3">
-          <button
-            onClick={logout}
-            style={{
-              backgroundColor: '#F00',
-              color: colorBranco,
-              borderRadius: 4,
-              border: 0
-            }}>
-            Sair
-          </button>
-        </div>
-
+        <motion.button
+          onClick={logout}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            backgroundColor: '#e74c3c',
+            color: colorBranco,
+            fontSize: '18px',
+            padding: '12px 20px',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            marginTop: '20px'
+          }}
+        >
+          <FaSignOutAlt size={22} />
+          Sair
+        </motion.button>
       </div>
     </div>
   );
