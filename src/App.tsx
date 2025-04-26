@@ -34,9 +34,11 @@ function App() {
             {/* Pode colocar outras privadas aqui também, tipo: */}
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/cadastrar-clientes" element={<CadastrarCliente />} />
+            <Route path="/cadastrar-clientes/:id" element={<CadastrarCliente />} />
             
             <Route path="/servicos" element={<Servicos />} />
             <Route path="/cadastrar-servicos" element={<CadastrarServico />} />
+            <Route path="/cadastrar-servicos/:id" element={<CadastrarServico />} />
           </Route>
 
         </Routes>
