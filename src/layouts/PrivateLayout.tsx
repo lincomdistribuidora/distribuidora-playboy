@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import Header from '../components/Header'; // Se você tiver Header no admin também
 
 const PrivateLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
