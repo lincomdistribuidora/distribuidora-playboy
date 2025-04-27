@@ -1,42 +1,90 @@
-#root {
+/* src/App.css ou src/global.css */
+
+/* Garante altura mínima */
+html, body, #root {
+  height: 100%;
+}
+
+/* Reset geral */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: 'Arial', sans-serif;
+  background-color: #f7f9fc;
+  color: #333;
+}
+
+/* Scrollbar estilizada */
+nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+nav::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+nav::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Animação do overlay blur */
+.overlay-blur {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Botão animado */
+.button-animate {
+  transition: transform 0.3s ease;
+}
+
+.button-animate.rotate {
+  transform: rotate(180deg);
+}
+
+/* Padding automático para conteúdo depois do header fixo */
+main {
+  padding-top: 80px; /* Empurra o conteúdo para baixo no admin */
+}
+
+/* Ajustes em dispositivos móveis */
+@media (max-width: 767px) {
+  main {
+    padding-top: 80px; /* Também no mobile */
+  }
+
+  .container {
+    padding-inline: 8px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Melhora transições e experiência */
+button, a {
+  transition: all 0.3s ease;
+}
+
+/* Melhorar experiência geral */
+.container {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

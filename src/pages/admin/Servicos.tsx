@@ -1,3 +1,4 @@
+// src/pages/admin/Servicos.tsx
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -16,35 +17,29 @@ interface Servico {
 const Servicos: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
-
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [filtro, setFiltro] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
-
   const servicosPorPagina = 10;
 
   useEffect(() => {
     const fetchServicos = async () => {
       const lista = await ServicoRepository.findAll();
-
-      // Mapeamento para garantir que os dados retornados tenham todos os campos necessários
-      const servicosCompletos: Servico[] = lista.map((servico: any) => ({
+      const servicosCompletos = lista.map((servico: any) => ({
         id: servico.id,
-        nome: servico.nome || '', // Adicionando valores padrão
+        nome: servico.nome || '',
         nomeCliente: servico.cliente?.nome || '',
         valor: servico.valor || '',
         tipo: servico.tipo || '',
       }));
-
       setServicos(servicosCompletos);
     };
-
     fetchServicos();
   }, []);
 
-  const handleEditar = (id: string) => {
-    navigate(`/cadastrar-servicos/${id}`);
-  };
+  const handleEditar = (id: string) => navigate(`/cadastrar-servicos/${id}`);
+  const handleCadastrar = () => navigate('/cadastrar-servicos');
+  const handleDashboard = () => navigate('/dashboard');
 
   const handleExcluir = async (id: string) => {
     const result = await Swal.fire({
@@ -60,7 +55,7 @@ const Servicos: React.FC = () => {
 
     if (result.isConfirmed) {
       await ServicoRepository.delete(id);
-      setServicos(servicos.filter(s => s.id !== id));
+      setServicos(servicos.filter((s) => s.id !== id));
       Swal.fire('Excluído!', 'O serviço foi removido com sucesso.', 'success');
     }
   };
@@ -80,110 +75,95 @@ const Servicos: React.FC = () => {
   };
 
   return (
-    <div style={styles.menuResponsivo}>
-      <div style={styles.container}>
+    <div style={styles.containerPrincipal}>
+      <div style={styles.conteudo}>
+        {/* Título */}
         <h1 style={styles.titulo}>
           Bem-vindo, {user?.displayName || user?.email || 'Usuário'}!
         </h1>
-        <h2 style={styles.subtitulo}>Serviços</h2>
 
-        {/* Botões de navegação */}
+        {/* Botões */}
         <div style={styles.botoesContainer}>
-          <button onClick={() => navigate('/dashboard')} style={{ ...styles.botao, ...styles.botaoSecundario }}>
-            Voltar
+          <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">
+            Voltar ao Dashboard
           </button>
-          <button onClick={() => navigate('/cadastrar-servicos')} style={{ ...styles.botao, ...styles.botaoPrimario }}>
-            Cadastrar
+          <button onClick={handleCadastrar} className="btn btn-success w-100">
+            Cadastrar Serviço
           </button>
         </div>
 
         {/* Campo de busca */}
-        <div style={styles.campoBuscaContainer}>
-          <input
-            type="text"
-            placeholder="Buscar serviços por qualquer informação..."
-            value={filtro}
-            onChange={(e) => {
-              setFiltro(e.target.value);
-              setPaginaAtual(1);
-            }}
-            style={styles.inputBusca}
-          />
-        </div>
+        <input
+          type="text"
+          className="form-control mb-4"
+          placeholder="Buscar serviços..."
+          value={filtro}
+          onChange={(e) => {
+            setFiltro(e.target.value);
+            setPaginaAtual(1);
+          }}
+          style={styles.inputBusca}
+        />
 
-        {/* Lista de serviços */}
-        <div>
-          {servicosFiltrados.length === 0 ? (
-            <p>Nenhum serviço encontrado.</p>
-          ) : (
-            servicosPaginados.map(servico => (
-              <div key={servico.id} style={styles.card}>
-                <div style={styles.cardBody}>
-                  <div>
-                    <h5 style={styles.cardTitulo}>{servico.nomeCliente}</h5>
-                    <p>
-                      <strong>Tipo de Serviço:</strong>{' '}
-                      <span style={styles.badge}>{servico.tipo}</span>
-                    </p>
-                    <p>
-                      <strong>Valor:</strong>{' '}
-                      <span style={styles.valor}>
-                        R$ {Number(servico.valor).toLocaleString('pt-BR', {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </p>
-                  </div>
+        {/* Lista */}
+        {servicosFiltrados.length === 0 ? (
+          <p className="text-center">Nenhum serviço encontrado.</p>
+        ) : (
+          servicosPaginados.map((servico) => (
+            <div key={servico.id} style={styles.cardServico}>
+              <div style={styles.cardBody}>
+                <div>
+                  <strong style={{ fontSize: '18px', color: colorAzul }}>{servico.nomeCliente}</strong>
+                  <br />
+                  <small style={{ fontSize: '14px' }}>
+                    {servico.tipo} | R$ {Number(servico.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </small>
+                </div>
 
-                  {/* Botões de ação */}
-                  <div style={styles.cardAcoes}>
-                    <button
-                      style={{ ...styles.botao, ...styles.botaoPrimario }}
-                      onClick={() => handleEditar(servico.id)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      style={{ ...styles.botao, ...styles.botaoPerigo }}
-                      onClick={() => handleExcluir(servico.id)}
-                    >
-                      Excluir
-                    </button>
-                  </div>
+                <div style={styles.botoesCard}>
+                  <button
+                    onClick={() => handleEditar(servico.id)}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleExcluir(servico.id)}
+                    className="btn btn-danger btn-sm"
+                  >
+                    Excluir
+                  </button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            </div>
+          ))
+        )}
 
         {/* Paginação */}
         {totalPaginas > 1 && (
-          <div style={styles.paginacaoContainer}>
+          <div className="d-flex align-items-center justify-content-center flex-wrap mt-4 gap-2">
             <button
-              style={styles.botaoPaginacao}
-              disabled={paginaAtual === 1}
               onClick={() => mudarPagina(paginaAtual - 1)}
+              disabled={paginaAtual === 1}
+              className="btn btn-outline-primary btn-sm"
             >
               Anterior
             </button>
-            <div style={{ ...styles.scrollPaginacao, scrollbarWidth: 'thin', scrollbarColor: '#888 transparent' } as any}>
-              {[...Array(totalPaginas)].map((_, i) => (
-                <button
-                  key={i}
-                  style={{
-                    ...styles.botaoPaginacao,
-                    ...(paginaAtual === i + 1 ? styles.botaoAtivo : {}),
-                  }}
-                  onClick={() => mudarPagina(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+
+            {[...Array(totalPaginas)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => mudarPagina(i + 1)}
+                className={`btn btn-sm ${paginaAtual === i + 1 ? 'btn-primary' : 'btn-light'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
             <button
-              style={styles.botaoPaginacao}
-              disabled={paginaAtual === totalPaginas}
               onClick={() => mudarPagina(paginaAtual + 1)}
+              disabled={paginaAtual === totalPaginas}
+              className="btn btn-outline-primary btn-sm"
             >
               Próximo
             </button>
@@ -195,124 +175,54 @@ const Servicos: React.FC = () => {
 };
 
 const styles = {
-  menuResponsivo: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#F5F5F5',
+  containerPrincipal: {
+    padding: '0px',
+    minHeight: '100vh',
+    backgroundColor: '#f5f5f5',
   },
-  container: {
+  conteudo: {
     width: '100%',
-    maxWidth: 1280,
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderRadius: 10,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    margin: '0 auto',
+    paddingInline: '2px', // 📱 Apenas 2px de margem lateral
+    maxWidth: '1280px',
   },
   titulo: {
     color: colorAzul,
-    fontSize: 24,
-    fontWeight: 'bold' as const,
-    marginBottom: 10,
-  },
-  subtitulo: {
-    fontSize: 20,
-    fontWeight: 'bold' as const,
-    color: '#333',
+    fontSize: '1.8rem',
+    marginBottom: '1rem',
+    paddingLeft: '8px',
   },
   botoesContainer: {
-    marginTop: 15,
     display: 'flex',
-    gap: 10,
-  },
-  botao: {
-    padding: '10px 20px',
-    fontSize: 14,
-    borderRadius: 4,
-    border: 0,
-    cursor: 'pointer',
-  },
-  botaoPrimario: {
-    backgroundColor: '#28a745',
-    color: colorBranco,
-  },
-  botaoSecundario: {
-    backgroundColor: '#6c757d',
-    color: colorBranco,
-  },
-  botaoPerigo: {
-    backgroundColor: colorVermelho,
-    color: colorBranco,
-  },
-  campoBuscaContainer: {
-    marginTop: 20,
+    flexDirection: 'column' as const,
+    gap: '10px',
+    marginBottom: '20px',
+    paddingInline: '8px',
   },
   inputBusca: {
-    fontSize: 16,
-    padding: 10,
-    borderRadius: 4,
-    border: '1px solid #ddd',
-    width: '100%',
+    fontSize: '16px',
+    padding: '10px',
+    margin: '10px',
+    width: 'calc(100% - 20px)',
+    boxSizing: 'border-box' as const,
   },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-    padding: 15,
-    marginBottom: 10,
+  cardServico: {
+    backgroundColor: '#fff',
+    padding: '15px',
+    marginBottom: '10px',
+    marginInline: '8px',
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
   cardBody: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column' as const,
+    gap: '10px',
   },
-  cardTitulo: {
-    fontSize: 18,
-    fontWeight: 'bold' as const,
-    color: colorAzul,
-  },
-  badge: {
-    backgroundColor: '#e0f7fa',
-    color: colorAzul,
-    padding: '5px 10px',
-    borderRadius: 8,
-    fontSize: 12,
-  },
-  valor: {
-    color: '#28a745',
-    fontWeight: 'bold' as const,
-  },
-  cardAcoes: {
+  botoesCard: {
     display: 'flex',
-    gap: 10,
-  },
-  paginacaoContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 20,
-  },
-  scrollPaginacao: {
-    display: 'flex',
-    gap: 10,
-    overflowX: 'auto' as const, // Valor corrigido
-    // scrollbarWidth: 'thin', // Personalização do scroll para navegadores compatíveis
-    // scrollbarColor: '#888 transparent',
-  },
-  botaoPaginacao: {
-    padding: '8px 16px',
-    fontSize: 14,
-    borderRadius: 4,
-    border: '1px solid #ddd',
-    backgroundColor: '#f1f1f1',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
-  botaoAtivo: {
-    backgroundColor: '#007bff', // Cor do botão ativo
-    color: '#fff', // Cor do texto do botão ativo
+    gap: '10px',
+    justifyContent: 'flex-end',
   },
 };
 
