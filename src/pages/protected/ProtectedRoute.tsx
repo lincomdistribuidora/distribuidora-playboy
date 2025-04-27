@@ -7,7 +7,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const { user } = useUser();
 
   if (!user) {
-    // Se não estiver logado, redireciona para a página de login
+    // Se não estiver logado, redireciona para a página Home
     return <Navigate to='/' />;
   }
 

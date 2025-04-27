@@ -6,15 +6,12 @@ import Agendamento from './pages/public/Agendamento';
 import ComoChegar from './pages/public/ComoChegar';
 import Login from './pages/public/Login';
 import Dashboard from './pages/client/Dashboard';
-import PrivateLayout from './layouts/PrivateLayout'; // <-- Importa o novo Layout
-import ProtectedRoute from './pages/protected/ProtectedRoute'; // <-- Para proteger rotas
-
-
+import PrivateLayout from './layouts/PrivateLayout';
+import ProtectedRoute from './pages/protected/ProtectedRoute';
 import Clientes from './pages/admin/Clientes';
+import Servicos from './pages/admin/Servicos';
 import CadastrarCliente from './pages/admin/CadastrarCliente';
 import CadastrarServico from './pages/admin/CadastrarServico';
-
-import Servicos from './pages/admin/Servicos';
 
 function App() {
   return (
@@ -28,14 +25,12 @@ function App() {
           <Route path="/como-chegar" element={<><Header /><ComoChegar /></>} />
           <Route path="/login" element={<><Header /><Login /></>} />
 
-          {/* Páginas Privadas (Protegidas) */}
+          {/* Páginas Privadas */}
           <Route element={<ProtectedRoute><PrivateLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
-            {/* Pode colocar outras privadas aqui também, tipo: */}
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/cadastrar-clientes" element={<CadastrarCliente />} />
             <Route path="/cadastrar-clientes/:id" element={<CadastrarCliente />} />
-            
             <Route path="/servicos" element={<Servicos />} />
             <Route path="/cadastrar-servicos" element={<CadastrarServico />} />
             <Route path="/cadastrar-servicos/:id" element={<CadastrarServico />} />
@@ -47,4 +42,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
