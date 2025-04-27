@@ -16,3 +16,6 @@
     - na pagina do cliente se cadastrar pegar o endereço completo e verificar se vai colocar informaçoes de contato também.
     - na pagina de login/cadastro de usuarios implementar os 'aceites' de termo de uso, tanto para para cadastro de usuários.
     - na pagina de login/cadastro fazer as *validações* dos contatos conforme é selecionado pelo *tipo* sendo:'Email','Senha','contato','endereco','etc...'.
+
+- background
+    - separar os dados para armazenar localmente diferentemente dos usuários públicos e privados.
