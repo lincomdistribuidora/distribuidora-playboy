@@ -19,20 +19,29 @@ const PrivateLayout: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar controlado */}
+      {/* Sidebar fixo */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Conteúdo principal */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* Header opcional no admin */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        marginLeft: !isMobile ? '250px' : '0', // <- AQUI: dar espaço do Sidebar
+        transition: 'margin-left 0.3s ease',
+      }}>
+        {/* Header apenas no mobile */}
         {isMobile && (
           <header style={{
-            backgroundColor: '#0d6efd',
+            backgroundColor: '#0b1d40',
             color: '#fff',
             padding: '1rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            position: 'sticky',
+            top: 0,
+            zIndex: 999,
           }}>
             <button
               style={{
@@ -46,13 +55,29 @@ const PrivateLayout: React.FC = () => {
             >
               ☰
             </button>
-            <span>Painel Administrativo</span>
+            <span style={{ fontWeight: 'bold' }}>Painel Administrativo</span>
           </header>
         )}
 
         {/* Conteúdo privado */}
-        <main style={{ flex: 1, padding: '24px' }}>
-          <Outlet />
+        <main style={{
+          flex: 1,
+          padding: '2rem',
+          minWidth: '0',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '1200px',
+            backgroundColor: '#fff',
+            padding: '2rem',
+            borderRadius: '12px',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
