@@ -1,4 +1,4 @@
-/* src/App.css ou src/global.css */
+/* src/global.css */
 
 /* Garante altura mínima */
 html, body, #root {
@@ -57,34 +57,43 @@ nav::-webkit-scrollbar-thumb:hover {
 
 /* Padding automático para conteúdo depois do header fixo */
 main {
-  padding-top: 80px; /* Empurra o conteúdo para baixo no admin */
+  padding-top: 80px; /* Espaço reservado para header fixo */
 }
 
-/* Ajustes em dispositivos móveis */
-@media (max-width: 767px) {
-  main {
-    padding-top: 80px; /* Também no mobile */
-  }
-
-  .container {
-    padding-inline: 8px;
-  }
-
-  input, textarea, select {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-}
-
-/* Melhora transições e experiência */
-button, a {
-  transition: all 0.3s ease;
-}
-
-/* Melhorar experiência geral */
+/* Estilo geral para containers */
 .container {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
+  padding-inline: 2px; /* Espaço lateral padrão */
+}
+
+/* Inputs, selects e textareas ocupam 100% */
+input, textarea, select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+/* Botões e links animados */
+button, a {
+  transition: all 0.3s ease;
+}
+
+/* Estilos responsivos */
+@media (max-width: 767px) {
+  main {
+    padding-top: 80px; /* No mobile também respeita o header */
+  }
+
+  .container {
+    padding-inline: 8px; /* Um pouco mais para ficar bonito no mobile */
+  }
+
+  input, textarea, select {
+    padding: 10px;
+    font-size: 1rem;
+  }
 }

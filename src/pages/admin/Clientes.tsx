@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { colorAzul } from '../../values/colors';
+import { colorAzul, colorBranco, colorVermelho } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Users } from 'lucide-react';
@@ -72,66 +72,142 @@ const Clientes = () => {
   };
 
   return (
-    <div style={{ padding: '0 2px' }}>
-      <div style={{ backgroundColor: '#F5F5F5', padding: '20px', borderRadius: '10px', minHeight: '80vh' }}>
-        <h1 style={{ color: colorAzul, fontSize: '1.8rem', marginBottom: '1rem' }}>
-          Bem-vindo, {user?.displayName || user?.email || 'Usuário'}!
-        </h1>
+    <div className="container mt-4">
+      <h1 style={styles.titulo}>
+        Bem-vindo, {user?.displayName || user?.email || 'Usuário'}!
+      </h1>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-          <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">Voltar ao Dashboard</button>
-          <button onClick={handleCadastrar} className="btn btn-success w-100">Cadastrar Cliente</button>
-        </div>
+      <div style={styles.botoesContainer}>
+        <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">
+          Voltar ao Dashboard
+        </button>
+        <button onClick={handleCadastrar} className="btn btn-success w-100">
+          Cadastrar Cliente
+        </button>
+      </div>
 
-        <input
-          type="text"
-          className="form-control mb-4"
-          placeholder="Buscar cliente..."
-          value={filtro}
-          onChange={(e) => {
-            setFiltro(e.target.value);
-            setPaginaAtual(1);
-          }}
-          style={{ fontSize: '16px', padding: '10px', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
-        />
+      <input
+        type="text"
+        className="form-control mb-4"
+        placeholder="Buscar cliente..."
+        value={filtro}
+        onChange={(e) => {
+          setFiltro(e.target.value);
+          setPaginaAtual(1);
+        }}
+        style={styles.inputBusca}
+      />
 
-        {clientesFiltrados.length === 0 ? (
-          <p className="text-center">Nenhum cliente encontrado.</p>
-        ) : (
-          clientesPaginados.map((cliente) => (
-            <div key={cliente.id} style={{ backgroundColor: '#fff', padding: '15px', marginBottom: '10px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+      {clientesFiltrados.length === 0 ? (
+        <p className="text-center">Nenhum cliente encontrado.</p>
+      ) : (
+        clientesPaginados.map((cliente) => (
+          <div key={cliente.id} style={styles.card}>
+            <div style={styles.cardBody}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Users size={32} strokeWidth={2} color={colorAzul} />
                 <div>
                   <strong style={{ fontSize: '18px' }}>{cliente.nome}</strong>
                   <br />
-                  <small style={{ fontSize: '14px' }}>{cliente.contatos?.length ? cliente.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ') : 'Sem contato'}</small>
+                  <small style={{ fontSize: '14px' }}>
+                    {cliente.contatos?.length
+                      ? cliente.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ')
+                      : 'Sem contato'}
+                  </small>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
-                <button onClick={() => handleEditar(cliente.id)} className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+
+              <div style={styles.botoesCard}>
+                <button
+                  onClick={() => handleEditar(cliente.id)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
                   <Edit2 size={16} /> Editar
                 </button>
-                <button onClick={() => handleExcluir(cliente.id)} className="btn btn-danger btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                  onClick={() => handleExcluir(cliente.id)}
+                  className="btn btn-danger btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
                   <Trash2 size={16} /> Excluir
                 </button>
               </div>
             </div>
-          ))
-        )}
-
-        {totalPaginas > 1 && (
-          <div className="d-flex align-items-center justify-content-center flex-wrap mt-4 gap-2">
-            <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className="btn btn-outline-primary btn-sm">Anterior</button>
-            {[...Array(totalPaginas)].map((_, i) => (
-              <button key={i} onClick={() => mudarPagina(i + 1)} className={`btn btn-sm ${paginaAtual === i + 1 ? 'btn-primary' : 'btn-light'}`}>{i + 1}</button>
-            ))}
-            <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className="btn btn-outline-primary btn-sm">Próximo</button>
           </div>
-        )}
-      </div>
+        ))
+      )}
+
+      {totalPaginas > 1 && (
+        <div className="d-flex align-items-center justify-content-center flex-wrap mt-4 gap-2">
+          <button
+            onClick={() => mudarPagina(paginaAtual - 1)}
+            disabled={paginaAtual === 1}
+            className="btn btn-outline-primary btn-sm"
+          >
+            Anterior
+          </button>
+
+          {[...Array(totalPaginas)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => mudarPagina(i + 1)}
+              className={`btn btn-sm ${paginaAtual === i + 1 ? 'btn-primary' : 'btn-light'}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => mudarPagina(paginaAtual + 1)}
+            disabled={paginaAtual === totalPaginas}
+            className="btn btn-outline-primary btn-sm"
+          >
+            Próximo
+          </button>
+        </div>
+      )}
     </div>
   );
+};
+
+const styles = {
+  titulo: {
+    color: colorAzul,
+    fontSize: '1.8rem',
+    marginBottom: '1rem',
+    paddingLeft: '8px',
+  },
+  botoesContainer: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '10px',
+    marginBottom: '20px',
+    paddingInline: '8px',
+  },
+  inputBusca: {
+    padding: '10px',
+    fontSize: '16px',
+    margin: '10px',
+  },
+  card: {
+    backgroundColor: '#fff',
+    marginBottom: '10px',
+    marginInline: '8px',
+    borderRadius: '8px',
+    padding: '15px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  },
+  cardBody: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '10px',
+  },
+  botoesCard: {
+    display: 'flex',
+    gap: '10px',
+    justifyContent: 'flex-end',
+  },
 };
 
 export default Clientes;
