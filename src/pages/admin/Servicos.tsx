@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { colorAzul, colorBranco, colorVermelho } from '../../values/colors';
+import { colorAzul } from '../../values/colors';
 import ServicoRepository from '../../repositories/ServicoRepository';
 import Swal from 'sweetalert2';
 
