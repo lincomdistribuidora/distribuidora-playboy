@@ -4,31 +4,80 @@ import {
   getDoc,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FirebaseService from '../services/FirebaseService';
 import { Servico } from '../types/Servico';
 import { Cliente } from '../types/Cliente';
 
+/**
+ * Repositório responsável pelas operações de CRUD para os serviços no Firestore.
+ * Abstrai todas as interações com o banco de dados relacionadas à entidade "serviço".
+ */
 class ServicoRepository {
+  /**
+   * Salva um novo serviço na coleção "servicos".
+   * @param servico Objeto do tipo Servico contendo os dados a serem salvos.
+   */
   async save(servico: Servico) {
     await FirebaseService.saveData('servicos', servico);
   }
 
+  /**
+   * Retorna todos os serviços cadastrados na coleção "servicos".
+   * @returns Lista de objetos do tipo Servico
+   */
   async findAll(): Promise<Servico[]> {
     const snapshot = await getDocs(collection(db, 'servicos'));
-    return snapshot.docs.map(doc => {
+
+    return snapshot.docs.map((doc) => {
       const data = doc.data();
+
       return {
         id: doc.id,
         tipo: data.tipo || '',
         valor: data.valor || '',
-        cliente: data.cliente as Cliente || undefined // 👈 importante
+        cliente: data.cliente as Cliente || undefined, // Cast necessário para manter o tipo correto
       };
     });
   }
 
+  /**
+   * Retorna os tipos de serviço existentes na coleção "servicos", sem duplicatas.
+   * (Usado quando não há uma base separada para tipos de serviço.)
+   * @returns Lista de tipos de serviço únicos (string[])
+   */
+  async findAllTiposServico(): Promise<string[]> {
+    const snapshot = await getDocs(collection(db, 'servicos'));
+
+    // Extrai apenas os campos "tipo"
+    const tipos = snapshot.docs.map((doc) => doc.data().tipo as string);
+
+    // Remove duplicatas com Set e filtra valores vazios
+    const tiposUnicos = Array.from(new Set(tipos)).filter(Boolean);
+
+    return tiposUnicos;
+  }
+
+  /**
+   * Retorna os tipos de serviço da coleção separada "tipo-servico".
+   * (Usado para listar tipos de serviço fixos/autônomos.)
+   * @returns Lista de nomes dos tipos de serviço
+   */
+  async findTiposFromCollection(): Promise<string[]> {
+    const snapshot = await getDocs(collection(db, 'tipo-servico'));
+
+    // Mapeia os documentos e retorna apenas o campo "nome"
+    return snapshot.docs.map((doc) => doc.data().nome as string).filter(Boolean);
+  }
+
+  /**
+   * Retorna um serviço da coleção "servicos" com base no ID.
+   * @param id ID do serviço a ser consultado
+   * @returns Objeto do tipo Servico
+   * @throws Erro se o documento não existir
+   */
   async findById(id: string): Promise<Servico> {
     const ref = doc(db, 'servicos', id);
     const snapshot = await getDoc(ref);
@@ -43,22 +92,33 @@ class ServicoRepository {
       id: snapshot.id,
       tipo: data.tipo || '',
       valor: data.valor || '',
-      cliente: data.cliente as Cliente || undefined  || null // 👈 importante
+      cliente: data.cliente as Cliente || undefined,
     };
   }
 
+  /**
+   * Atualiza um serviço existente com base no ID.
+   * @param id ID do serviço a ser atualizado
+   * @param servico Objeto com os dados atualizados
+   */
   async update(id: string, servico: Servico) {
     const servicoRef = doc(db, 'servicos', id);
+
     await updateDoc(servicoRef, {
       tipo: servico.tipo,
       valor: servico.valor,
-      cliente: servico.cliente
+      cliente: servico.cliente,
     });
   }
 
+  /**
+   * Remove um serviço da coleção "servicos" com base no ID.
+   * @param id ID do serviço a ser removido
+   */
   async delete(id: string) {
     await deleteDoc(doc(db, 'servicos', id));
   }
 }
 
+// Exporta uma instância única do repositório para ser usada em toda a aplicação
 export default new ServicoRepository();

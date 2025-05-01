@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUsers, FaTools, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaUsers, FaTools, FaSignOutAlt, FaPlus } from 'react-icons/fa'; // Importando ícone para "Cadastrar"
 import { useUser } from '../contexts/UserContext';
 import { getAuth, signOut } from 'firebase/auth';
 
@@ -118,6 +118,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </Link>
         <Link to="/servicos" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/servicos' ? activeLinkStyle : {}) }}>
           <FaTools style={iconStyle} /> Serviços
+        </Link>
+        {/* Nova opção para Cadastrar Tipo de Serviço */}
+        <Link to="/cadastrar-tipo-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-tipo-servico' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Cadastrar Tipo de Serviço
         </Link>
       </nav>
 

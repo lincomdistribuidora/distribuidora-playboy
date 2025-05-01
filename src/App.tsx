@@ -12,6 +12,7 @@ import Clientes from './pages/admin/Clientes';
 import Servicos from './pages/admin/Servicos';
 import CadastrarCliente from './pages/admin/CadastrarCliente';
 import CadastrarServico from './pages/admin/CadastrarServico';
+import CadastrarTipoServico from './pages/admin/CadastrarTipoServico';  // Nova página para cadastrar tipo de serviço
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
             <Route path="/servicos" element={<Servicos />} />
             <Route path="/cadastrar-servicos" element={<CadastrarServico />} />
             <Route path="/cadastrar-servicos/:id" element={<CadastrarServico />} />
+            <Route path="/cadastrar-tipo-servico" element={<CadastrarTipoServico />} /> 
+            <Route path="/cadastrar-tipo-servico/:id" element={<CadastrarTipoServico />} /> 
           </Route>
 
         </Routes>
@@ -42,4 +45,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

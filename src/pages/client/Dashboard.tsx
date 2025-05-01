@@ -2,7 +2,7 @@
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaUsers, FaCogs, FaSignOutAlt } from 'react-icons/fa';
+import { FaUsers, FaCogs, FaSignOutAlt, FaPlus } from 'react-icons/fa'; // Importando ícone para 'Cadastrar'
 import { colorAzul, colorBranco } from '../../values/colors';
 
 const Dashboard = () => {
@@ -19,6 +19,11 @@ const Dashboard = () => {
       label: 'Serviços',
       icon: <FaCogs size={22} />,
       onClick: () => navigate('/servicos', { replace: true }),
+    },
+    {
+      label: 'Cadastrar Tipo de Serviço', // Nova opção no menu
+      icon: <FaPlus size={22} />, // Ícone para "Cadastrar"
+      onClick: () => navigate('/cadastrar-tipo-servico', { replace: true }), // Navegação para a nova página
     },
   ];
 
@@ -68,7 +73,7 @@ const Dashboard = () => {
             borderRadius: '10px',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
-            marginTop: '20px'
+            marginTop: '20px',
           }}
         >
           <FaSignOutAlt size={22} />

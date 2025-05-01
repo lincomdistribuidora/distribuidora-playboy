@@ -10,30 +10,14 @@ import { Cliente } from '../../types/Cliente';
 import Select from 'react-select';
 
 /**
- * Lista fixa dos tipos de serviços disponíveis.
+ * Tela de cadastro e edição de serviços.
  */
-const servicosDisponiveis = [
-  "Limpeza Técnica",
-  "Higienização de Banco - Tecido/Couro",
-  "Higienização Interna",
-  "Descontaminação e Vitrificação Vidros",
-  "Descontaminação e Cristalização de Pinturas",
-  "Limpeza de Motor",
-  "Polimento de Farol",
-  "Polimento de Prata",
-  "Polimento Ouro",
-  "Vitrificação de Banco de Couro",
-  "Vitrificação de Plástico Externo",
-  "Vitrificação de Pintura",
-  "Vitrificação de Pintura de Moto",
-  "OUTRAS OPÇÕES"
-];
-
 const CadastrarServico = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [tiposServico, setTiposServico] = useState<string[]>([]);
   const [servico, setServico] = useState<Servico>({
     id: '',
     tipo: '',
@@ -45,11 +29,19 @@ const CadastrarServico = () => {
     }
   });
 
+  // Carrega dados iniciais
   useEffect(() => {
-    // Busca todos os clientes ao carregar a tela
+    // Busca os clientes cadastrados
     clienteRepository.findAll().then(setClientes).catch(console.error);
 
-    // Se estiver editando, carrega o serviço pelo ID
+    // Busca os tipos de serviço da coleção "tipo-servico"
+    servicoeRepository.findTiposFromCollection()
+      .then(setTiposServico)
+      .catch((error) => {
+        console.error('Erro ao buscar tipos de serviço:', error);
+      });
+
+    // Se estiver editando, busca o serviço atual
     if (id) {
       servicoeRepository.findById(id)
         .then((servicoData) => {
@@ -69,7 +61,7 @@ const CadastrarServico = () => {
   }, [id]);
 
   /**
-   * Atualiza um campo simples do serviço (tipo ou valor)
+   * Atualiza os campos do serviço
    */
   const handleChange = (field: keyof Servico, value: string) => {
     setServico((prev) => ({
@@ -79,7 +71,7 @@ const CadastrarServico = () => {
   };
 
   /**
-   * Função para filtrar clientes no campo de pesquisa
+   * Filtra clientes com base no texto digitado no autocomplete
    */
   const handleClientSearch = (search: string) => {
     return clientes
@@ -91,7 +83,7 @@ const CadastrarServico = () => {
   };
 
   /**
-   * Submete o formulário para salvar ou atualizar o serviço
+   * Salva ou atualiza o serviço
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,44 +117,26 @@ const CadastrarServico = () => {
     }
   };
 
-  // Formatação para os dados do React-Select
-  const servicosOptions = servicosDisponiveis.map((servicoTipo) => ({
-    value: servicoTipo,
-    label: servicoTipo
-  }));
-
   return (
     <div className='menu-responsivel'>
-      <div className="container mt-5" style={{ backgroundColor: '#F5F5F5', padding: 20, borderRadius: 8 }}>
+      <div className="container mt-5" style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8 }}>
         <h2 style={{ color: colorAzul }}>
           {id ? 'Editar Serviço' : 'Cadastrar Serviço'}
         </h2>
 
         <form onSubmit={handleSubmit}>
-          {/* Tipo do Serviço com React-Select */}
+          {/* Tipo do Serviço com autocomplete */}
           <div className="mt-4">
             <label>Tipo do Serviço:</label>
             <Select
-              value={servicosOptions.find(option => option.value === servico.tipo)}
-              onChange={(selectedOption) => handleChange('tipo', selectedOption?.value || '')}
-              options={servicosOptions}
+              value={servico.tipo ? { value: servico.tipo, label: servico.tipo } : null}
+              onChange={(selected) => handleChange('tipo', selected?.value || '')}
+              options={tiposServico.map(tipo => ({ value: tipo, label: tipo }))}
+              isClearable
+              isSearchable
               className="mt-2"
-              placeholder="Selecione..."
-              required
-            />
-          </div>
-
-          {/* Valor */}
-          <div className="mt-4">
-            <label>Valor:</label>
-            <NumericFormat
-              placeholder='R$ 150,00'
-              value={servico.valor}
-              onValueChange={(values) => handleChange('valor', values.value)}
-              thousandSeparator="."
-              decimalSeparator=","
-              prefix="R$ "
-              className="form-control mt-2"
+              placeholder="Digite ou selecione o tipo..."
+              noOptionsMessage={() => "Nenhum tipo encontrado"}
               required
             />
           </div>
@@ -185,24 +159,32 @@ const CadastrarServico = () => {
                   }));
                 }
               }}
-              options={handleClientSearch('')}  // Passando as opções filtradas aqui
+              options={handleClientSearch('')}
               className="mt-2"
               placeholder="Digite o nome do cliente"
               required
             />
           </div>
 
-          {/* Botões */}
+          {/* Valor */}
+          <div className="mt-4">
+            <label>Valor:</label>
+            <NumericFormat
+              placeholder='R$ 150,00'
+              value={servico.valor}
+              onValueChange={(values) => handleChange('valor', values.value)}
+              thousandSeparator="."
+              decimalSeparator=","
+              prefix="R$ "
+              className="form-control mt-2"
+              required
+            />
+          </div>
+
+          {/* Botão de envio */}
           <div className="mt-4 d-flex gap-2">
             <button type="submit" className="btn btn-success">
               {id ? 'Salvar Alterações' : 'Salvar Serviço'}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/servicos')}
-              className="btn btn-secondary"
-            >
-              Cancelar
             </button>
           </div>
         </form>
