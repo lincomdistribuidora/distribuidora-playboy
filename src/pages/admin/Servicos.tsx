@@ -1,7 +1,6 @@
 // src/pages/admin/Servicos.tsx
 
 import { useEffect, useState } from 'react';
-import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import ServicoRepository from '../../repositories/ServicoRepository';
@@ -17,7 +16,6 @@ interface Servico {
 }
 
 const Servicos = () => {
-  const { user } = useUser();
   const navigate = useNavigate();
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [filtro, setFiltro] = useState('');

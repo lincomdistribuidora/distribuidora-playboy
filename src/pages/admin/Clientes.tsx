@@ -1,7 +1,6 @@
 // src/pages/admin/Clientes.tsx
 
 import { useEffect, useState } from 'react';
-import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
@@ -21,7 +20,6 @@ interface Cliente {
 }
 
 const Clientes = () => {
-  const { user } = useUser();
   const navigate = useNavigate();
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
