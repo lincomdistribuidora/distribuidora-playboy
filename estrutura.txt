@@ -7,8 +7,8 @@ Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-Cti
 
 ---
 
-Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-ttM3FMEQ.js
-(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))i(a);new MutationObserver(a=>{for(const l of a)if(l.type==="childList")for(const u of l.addedNodes)u.tagName==="LINK"&&u.rel==="modulepreload"&&i(u)}).observe(document,{childList:!0,subtree:!0});function n(a){const l={};return a.integrity&&(l.integrity=a.integrity),a.referrerPolicy&&(l.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?l.credentials="include":a.crossOrigin==="anonymous"?l.credentials="omit":l.credentials="same-origin",l}function i(a){if(a.ep)return;a.ep=!0;const l=n(a);fetch(a.href,l)}})();function TV(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Qg={exports:{}},yc={};/**
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-G_qRpUVa.js
+(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))i(a);new MutationObserver(a=>{for(const l of a)if(l.type==="childList")for(const u of l.addedNodes)u.tagName==="LINK"&&u.rel==="modulepreload"&&i(u)}).observe(document,{childList:!0,subtree:!0});function n(a){const l={};return a.integrity&&(l.integrity=a.integrity),a.referrerPolicy&&(l.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?l.credentials="include":a.crossOrigin==="anonymous"?l.credentials="omit":l.credentials="same-origin",l}function i(a){if(a.ep)return;a.ep=!0;const l=n(a);fetch(a.href,l)}})();function AV(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Xg={exports:{}},wc={};/**
  * @license React
  * react-jsx-runtime.production.js
  *
@@ -16,7 +16,7 @@ Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-ttM
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- */var MT;function EV(){if(MT)return yc;MT=1;var t=Symbol.for("react.transitional.element"),e=Symbol.for("react.fragment");function n(i,a,l){var u=null;if(l!==void 0&&(u=""+l),a.key!==void 0&&(u=""+a.key),"key"in a){l={};for(var h in a)h!=="key"&&(l[h]=a[h])}else l=a;return a=l.ref,{$$typeof:t,type:i,key:u,ref:a!==void 0?a:null,props:l}}return yc.Fragment=e,yc.jsx=n,yc.jsxs=n,yc}var NT;function SV(){return NT||(NT=1,Qg.exports=EV()),Qg.exports}var P=SV();const AV=()=>{};var LT={};/**
+ */var LE;function xV(){if(LE)return wc;LE=1;var t=Symbol.for("react.transitional.element"),e=Symbol.for("react.fragment");function n(i,a,l){var u=null;if(l!==void 0&&(u=""+l),a.key!==void 0&&(u=""+a.key),"key"in a){l={};for(var h in a)h!=="key"&&(l[h]=a[h])}else l=a;return a=l.ref,{$$typeof:t,type:i,key:u,ref:a!==void 0?a:null,props:l}}return wc.Fragment=e,wc.jsx=n,wc.jsxs=n,wc}var UE;function CV(){return UE||(UE=1,Xg.exports=xV()),Xg.exports}var P=CV();const RV=()=>{};var BE={};/**
  * @license
 
 ---
@@ -30,7 +30,7 @@ Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\index.html
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="home.css" />
     <title>Vite + React + TS</title>
-    <script type="module" crossorigin src="/assets/index-ttM3FMEQ.js"></script>
+    <script type="module" crossorigin src="/assets/index-G_qRpUVa.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CtiMt5AR.css">
 
 ---
@@ -78,16 +78,16 @@ const Header = () => {
 ---
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\components\Sidebar.tsx
-// src/components/Sidebar.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUsers, FaTools, FaSignOutAlt } from 'react-icons/fa'; // Adicionado ícone de logout
+import { FaHome, FaUsers, FaTools, FaSignOutAlt } from 'react-icons/fa';
 import { useUser } from '../contexts/UserContext';
 import { getAuth, signOut } from 'firebase/auth';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+}
 
 ---
 
@@ -124,12 +124,12 @@ Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\layouts\PrivateLa
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import Header from '../components/Header'; // Se você tiver Header no admin também
 
 const PrivateLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  useEffect(() => {
 
 ---
 
@@ -176,15 +176,15 @@ const servicosDisponiveis = [
 ---
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\Clientes.tsx
+// src/pages/admin/Clientes.tsx
 import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { colorAzul, colorBranco, colorVermelho } from '../../values/colors';
+import { colorAzul } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Users } from 'lucide-react';
 
-// Define o tipo Cliente
 interface Contato {
 
 ---
@@ -204,16 +204,16 @@ const EditarCliente = () => {
 ---
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\Servicos.tsx
-import React, { useEffect, useState } from 'react';
+// src/pages/admin/Servicos.tsx
+import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { colorAzul, colorBranco, colorVermelho } from '../../values/colors';
+import { colorAzul } from '../../values/colors';
 import ServicoRepository from '../../repositories/ServicoRepository';
 import Swal from 'sweetalert2';
 
 interface Servico {
   id: string;
-  nome: string;
 
 ---
 
@@ -380,16 +380,16 @@ export const colorVermelho = '#F00';
 ---
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\App.css
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* src/global.css */
+
+/* Garante altura mínima */
+html, body, #root {
+  height: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
+/* Reset geral */
+* {
+  margin: 0;
 
 ---
 
