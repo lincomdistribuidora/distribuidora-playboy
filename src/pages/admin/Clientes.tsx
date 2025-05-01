@@ -1,4 +1,5 @@
 // src/pages/admin/Clientes.tsx
+
 import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Users } from 'lucide-react';
 
+// Tipagens auxiliares
 interface Contato {
   tipo: string;
   valor: string;
@@ -21,11 +23,13 @@ interface Cliente {
 const Clientes = () => {
   const { user } = useUser();
   const navigate = useNavigate();
+
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [filtro, setFiltro] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
   const clientesPorPagina = 10;
 
+  // Buscar todos os clientes ao carregar a tela
   useEffect(() => {
     const fetchClientes = async () => {
       const lista = await ClienteRepository.findAll();
@@ -34,10 +38,12 @@ const Clientes = () => {
     fetchClientes();
   }, []);
 
-  const handleEditar = (id: string) => navigate(`/cadastrar-clientes/${id}`);
-  const handleCadastrar = () => navigate('/cadastrar-clientes');
+  // Ações de navegação
+  const handleEditar = (id: string) => navigate(`/cadastrar-cliente/${id}`);
+  const handleCadastrar = () => navigate('/cadastrar-cliente');
   const handleDashboard = () => navigate('/dashboard');
 
+  // Excluir cliente com confirmação
   const handleExcluir = async (id: string) => {
     const result = await Swal.fire({
       title: 'Tem certeza?',
@@ -57,10 +63,14 @@ const Clientes = () => {
     }
   };
 
-  const clientesFiltrados = clientes.filter(cliente =>
-    JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase())
-  );
+  // Filtrar e ordenar clientes por nome (A-Z)
+  const clientesFiltrados = clientes
+    .filter(cliente =>
+      JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase())
+    )
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
+  // Paginação
   const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
   const indiceInicial = (paginaAtual - 1) * clientesPorPagina;
   const clientesPaginados = clientesFiltrados.slice(indiceInicial, indiceInicial + clientesPorPagina);
@@ -73,10 +83,7 @@ const Clientes = () => {
 
   return (
     <div className="container mt-4">
-      <h1 style={styles.titulo}>
-        Bem-vindo, {user?.displayName || user?.email || 'Usuário'}!
-      </h1>
-
+      {/* Botões principais */}
       <div style={styles.botoesContainer}>
         <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">
           Voltar ao Dashboard
@@ -86,6 +93,7 @@ const Clientes = () => {
         </button>
       </div>
 
+      {/* Campo de busca */}
       <input
         type="text"
         className="form-control mb-4"
@@ -93,11 +101,12 @@ const Clientes = () => {
         value={filtro}
         onChange={(e) => {
           setFiltro(e.target.value);
-          setPaginaAtual(1);
+          setPaginaAtual(1); // Reiniciar para página 1 ao filtrar
         }}
         style={styles.inputBusca}
       />
 
+      {/* Lista de clientes ou mensagem de vazio */}
       {clientesFiltrados.length === 0 ? (
         <p className="text-center">Nenhum cliente encontrado.</p>
       ) : (
@@ -138,6 +147,7 @@ const Clientes = () => {
         ))
       )}
 
+      {/* Paginação */}
       {totalPaginas > 1 && (
         <div className="d-flex align-items-center justify-content-center flex-wrap mt-4 gap-2">
           <button
@@ -171,6 +181,7 @@ const Clientes = () => {
   );
 };
 
+// Estilização inline
 const styles = {
   titulo: {
     color: colorAzul,

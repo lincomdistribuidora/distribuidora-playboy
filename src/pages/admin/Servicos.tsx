@@ -1,4 +1,5 @@
 // src/pages/admin/Servicos.tsx
+
 import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ interface Servico {
   nomeCliente: string;
   valor: string;
   tipo: string;
+  criadoEm: string; // Data de criação no formato ISO (ex: "2024-05-01T12:00:00Z")
 }
 
 const Servicos = () => {
@@ -22,25 +24,32 @@ const Servicos = () => {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const servicosPorPagina = 10;
 
+  // Buscar e formatar serviços da API ao carregar o componente
   useEffect(() => {
     const fetchServicos = async () => {
       const lista = await ServicoRepository.findAll();
+
       const servicosFormatados = lista.map((s: any) => ({
         id: s.id,
         nome: s.nome || '',
         nomeCliente: s.cliente?.nome || '',
         valor: s.valor || '',
         tipo: s.tipo || '',
+        criadoEm: s.criadoEm || '', // Certifique-se de que a API retorna esse campo
       }));
+
       setServicos(servicosFormatados);
     };
+
     fetchServicos();
   }, []);
 
-  const handleEditar = (id: string) => navigate(`/cadastrar-servicos/${id}`);
-  const handleCadastrar = () => navigate('/cadastrar-servicos');
+  // Ações de navegação
+  const handleEditar = (id: string) => navigate(`/cadastrar-servico/${id}`);
+  const handleCadastrar = () => navigate('/cadastrar-servico');
   const handleDashboard = () => navigate('/dashboard');
 
+  // Exclusão de serviço com confirmação
   const handleExcluir = async (id: string) => {
     const result = await Swal.fire({
       title: 'Tem certeza?',
@@ -60,10 +69,14 @@ const Servicos = () => {
     }
   };
 
-  const servicosFiltrados = servicos.filter(servico =>
-    JSON.stringify(servico).toLowerCase().includes(filtro.toLowerCase())
-  );
+  // Filtrar e ordenar por 'criadoEm' (mais recentes primeiro)
+  const servicosFiltrados = servicos
+    .filter(servico =>
+      JSON.stringify(servico).toLowerCase().includes(filtro.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
 
+  // Paginação
   const totalPaginas = Math.ceil(servicosFiltrados.length / servicosPorPagina);
   const indiceInicial = (paginaAtual - 1) * servicosPorPagina;
   const servicosPaginados = servicosFiltrados.slice(indiceInicial, indiceInicial + servicosPorPagina);
@@ -76,10 +89,7 @@ const Servicos = () => {
 
   return (
     <div className="container mt-4">
-      <h1 style={styles.titulo}>
-        Bem-vindo, {user?.displayName || user?.email || 'Usuário'}!
-      </h1>
-
+      {/* Botões de navegação */}
       <div style={styles.botoesContainer}>
         <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">
           Voltar ao Dashboard
@@ -89,6 +99,7 @@ const Servicos = () => {
         </button>
       </div>
 
+      {/* Campo de busca */}
       <input
         type="text"
         className="form-control mb-4"
@@ -96,11 +107,12 @@ const Servicos = () => {
         value={filtro}
         onChange={(e) => {
           setFiltro(e.target.value);
-          setPaginaAtual(1);
+          setPaginaAtual(1); // Volta para a primeira página ao digitar
         }}
         style={styles.inputBusca}
       />
 
+      {/* Lista de serviços ou mensagem */}
       {servicosFiltrados.length === 0 ? (
         <p className="text-center">Nenhum serviço encontrado.</p>
       ) : (
@@ -111,6 +123,9 @@ const Servicos = () => {
                 <strong style={{ fontSize: '18px', color: colorAzul }}>{servico.nomeCliente}</strong>
                 <small style={{ fontSize: '14px' }}>
                   {servico.tipo} | R$ {Number(servico.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </small>
+                <small style={{ fontSize: '12px', color: '#888' }}>
+                  Criado em: {new Date(servico.criadoEm).toLocaleDateString('pt-BR')}
                 </small>
               </div>
 
@@ -135,6 +150,7 @@ const Servicos = () => {
         ))
       )}
 
+      {/* Paginação */}
       {totalPaginas > 1 && (
         <div className="d-flex align-items-center justify-content-center flex-wrap mt-4 gap-2">
           <button
@@ -168,6 +184,7 @@ const Servicos = () => {
   );
 };
 
+// Estilos inline
 const styles = {
   titulo: {
     color: colorAzul,

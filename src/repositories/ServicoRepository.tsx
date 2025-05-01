@@ -29,8 +29,10 @@ class ServicoRepository {
    * @returns Lista de objetos do tipo Servico
    */
   async findAll(): Promise<Servico[]> {
+    // Faz a leitura dos documentos da coleção "servicos"
     const snapshot = await getDocs(collection(db, 'servicos'));
 
+    // Mapeia os dados dos serviços e retorna a lista
     return snapshot.docs.map((doc) => {
       const data = doc.data();
 
@@ -39,6 +41,7 @@ class ServicoRepository {
         tipo: data.tipo || '',
         valor: data.valor || '',
         cliente: data.cliente as Cliente || undefined, // Cast necessário para manter o tipo correto
+        criadoEm: data.criadoEm || '', // Adicionando o campo 'criadoEm'
       };
     });
   }
@@ -93,6 +96,7 @@ class ServicoRepository {
       tipo: data.tipo || '',
       valor: data.valor || '',
       cliente: data.cliente as Cliente || undefined,
+      criadoEm: data.criadoEm || '', // Garantir que o campo 'criadoEm' está disponível
     };
   }
 
@@ -108,6 +112,7 @@ class ServicoRepository {
       tipo: servico.tipo,
       valor: servico.valor,
       cliente: servico.cliente,
+      criadoEm: servico.criadoEm, // Incluindo a atualização da data de criação, se necessário
     });
   }
 

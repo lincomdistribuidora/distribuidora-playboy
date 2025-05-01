@@ -110,18 +110,34 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       {/* Navegação */}
       <nav style={navStyle}>
+        {/* Dashboard no início */}
         <Link to="/dashboard" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/dashboard' ? activeLinkStyle : {}) }}>
           <FaHome style={iconStyle} /> Dashboard
         </Link>
+
+        {/* Cadastrar Tipo de Serviço */}
+        <Link to="/cadastrar-tipo-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-tipo-servico' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Cadastrar Tipo de Serviço
+        </Link>
+
+        {/* Clientes */}
         <Link to="/clientes" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/clientes' ? activeLinkStyle : {}) }}>
           <FaUsers style={iconStyle} /> Clientes
         </Link>
+
+        {/* Cadastrar Cliente */}
+        <Link to="/cadastrar-cliente" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-cliente' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Cadastrar Cliente
+        </Link>
+
+        {/* Serviços */}
         <Link to="/servicos" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/servicos' ? activeLinkStyle : {}) }}>
           <FaTools style={iconStyle} /> Serviços
         </Link>
-        {/* Nova opção para Cadastrar Tipo de Serviço */}
-        <Link to="/cadastrar-tipo-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-tipo-servico' ? activeLinkStyle : {}) }}>
-          <FaPlus style={iconStyle} /> Cadastrar Tipo de Serviço
+
+        {/* Cadastrar Serviço */}
+        <Link to="/cadastrar-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-servico' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Cadastrar Serviço
         </Link>
       </nav>
 

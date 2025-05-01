@@ -28,13 +28,20 @@ function App() {
 
           {/* Páginas Privadas */}
           <Route element={<ProtectedRoute><PrivateLayout /></ProtectedRoute>}>
+            {/* Dashboard no início */}
             <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Cliente */}
             <Route path="/clientes" element={<Clientes />} />
-            <Route path="/cadastrar-clientes" element={<CadastrarCliente />} />
-            <Route path="/cadastrar-clientes/:id" element={<CadastrarCliente />} />
+            <Route path="/cadastrar-cliente" element={<CadastrarCliente />} />
+            <Route path="/cadastrar-cliente/:id" element={<CadastrarCliente />} />
+            
+            {/* Serviços */}
             <Route path="/servicos" element={<Servicos />} />
-            <Route path="/cadastrar-servicos" element={<CadastrarServico />} />
-            <Route path="/cadastrar-servicos/:id" element={<CadastrarServico />} />
+            <Route path="/cadastrar-servico" element={<CadastrarServico />} />
+            <Route path="/cadastrar-servico/:id" element={<CadastrarServico />} />
+            
+            {/* Cadastrar Tipo de Serviço */}
             <Route path="/cadastrar-tipo-servico" element={<CadastrarTipoServico />} /> 
             <Route path="/cadastrar-tipo-servico/:id" element={<CadastrarTipoServico />} /> 
           </Route>
