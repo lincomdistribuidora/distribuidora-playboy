@@ -8,22 +8,19 @@ import {
   setDoc
 } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-
-type TipoServico = {
-  id?: string;
-  nome: string;
-  criadoEm: string;
-};
+import { TipoServico } from '../types/TipoServico'; // Importando o tipo
 
 class TipoServicoRepository {
   /**
    * Salva um novo tipo de serviço
    * @param tipoServico Objeto contendo o nome e data de criação
    */
-  async save(tipoServico: Omit<TipoServico, 'id'> | TipoServico): Promise<void> {
-    const ref = tipoServico.id
+  async save(tipoServico: TipoServico | Omit<TipoServico, 'id'>): Promise<void> {
+    // Verifica se o objeto tem a propriedade 'id', se sim, é um tipo de serviço existente
+    const ref = 'id' in tipoServico 
       ? doc(db, 'tipo-servico', tipoServico.id)
       : doc(collection(db, 'tipo-servico'));
+
     await setDoc(ref, {
       nome: tipoServico.nome,
       criadoEm: tipoServico.criadoEm
@@ -38,7 +35,7 @@ class TipoServicoRepository {
     return snapshot.docs.map(doc => {
       const data = doc.data();
       return {
-        id: doc.id,
+        id: doc.id, // Aqui sempre teremos 'id', porque é fornecido pelo Firestore
         nome: data.nome || '',
         criadoEm: data.criadoEm || ''
       };
