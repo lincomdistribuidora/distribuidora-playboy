@@ -1,10 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
+
+// Rotas/Pagina publicas
 import Header from './components/Header';
 import Home from './pages/public/Home';
 import Agendamento from './pages/public/Agendamento';
 import ComoChegar from './pages/public/ComoChegar';
+
+
 import Login from './pages/public/Login';
+import DashboardClientePublico from './pages/public/DashboardClientePublico';
+
+
+// Rotas/Pagina admim(privada)
 import Dashboard from './pages/client/Dashboard';
 import PrivateLayout from './layouts/PrivateLayout';
 import ProtectedRoute from './pages/protected/ProtectedRoute';
@@ -12,7 +20,11 @@ import Clientes from './pages/admin/Clientes';
 import Servicos from './pages/admin/Servicos';
 import CadastrarCliente from './pages/admin/CadastrarCliente';
 import CadastrarServico from './pages/admin/CadastrarServico';
-import CadastrarTipoServico from './pages/admin/CadastrarTipoServico';  // Nova página para cadastrar tipo de serviço
+import CadastrarTipoServico from './pages/admin/CadastrarTipoServico'; 
+
+
+
+
 
 function App() {
   return (
@@ -24,7 +36,9 @@ function App() {
           <Route path="/" element={<><Header /><Home /></>} />
           <Route path="/agendamento" element={<><Header /><Agendamento /></>} />
           <Route path="/como-chegar" element={<><Header /><ComoChegar /></>} />
+
           <Route path="/login" element={<><Header /><Login /></>} />
+          <Route path="/dashboard-cliente-publico" element={<><Header /><DashboardClientePublico /></>} />
 
           {/* Páginas Privadas */}
           <Route element={<ProtectedRoute><PrivateLayout /></ProtectedRoute>}>

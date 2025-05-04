@@ -1,3 +1,17 @@
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-9522nsz9.js
+function SM(t,e){for(var n=0;n<e.length;n++){const i=e[n];if(typeof i!="string"&&!Array.isArray(i)){for(const s in i)if(s!=="default"&&!(s in t)){const o=Object.getOwnPropertyDescriptor(i,s);o&&Object.defineProperty(t,s,o.get?o:{enumerable:!0,get:()=>i[s]})}}}return Object.freeze(Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}))}(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const s of document.querySelectorAll('link[rel="modulepreload"]'))i(s);new MutationObserver(s=>{for(const o of s)if(o.type==="childList")for(const u of o.addedNodes)u.tagName==="LINK"&&u.rel==="modulepreload"&&i(u)}).observe(document,{childList:!0,subtree:!0});function n(s){const o={};return s.integrity&&(o.integrity=s.integrity),s.referrerPolicy&&(o.referrerPolicy=s.referrerPolicy),s.crossOrigin==="use-credentials"?o.credentials="include":s.crossOrigin==="anonymous"?o.credentials="omit":o.credentials="same-origin",o}function i(s){if(s.ep)return;s.ep=!0;const o=n(s);fetch(s.href,o)}})();function AM(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Jv={exports:{}},$c={};/**
+ * @license React
+ * react-jsx-runtime.production.js
+ *
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */var gT;function CM(){if(gT)return $c;gT=1;var t=Symbol.for("react.transitional.element"),e=Symbol.for("react.fragment");function n(i,s,o){var u=null;if(o!==void 0&&(u=""+o),s.key!==void 0&&(u=""+s.key),"key"in s){o={};for(var f in s)f!=="key"&&(o[f]=s[f])}else o=s;return s=o.ref,{$$typeof:t,type:i,key:u,ref:s!==void 0?s:null,props:o}}return $c.Fragment=e,$c.jsx=n,$c.jsxs=n,$c}var vT;function xM(){return vT||(vT=1,Jv.exports=CM()),Jv.exports}var M=xM();const RM=()=>{};var yT={};/**
+ * @license
+
+---
+
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-CtiMt5AR.css
 @charset "UTF-8";/*!
 * Bootstrap  v5.3.5 (https://getbootstrap.com/)
@@ -7,30 +21,16 @@ Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-Cti
 
 ---
 
-Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\assets\index-G_qRpUVa.js
-(function(){const e=document.createElement("link").relList;if(e&&e.supports&&e.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))i(a);new MutationObserver(a=>{for(const l of a)if(l.type==="childList")for(const u of l.addedNodes)u.tagName==="LINK"&&u.rel==="modulepreload"&&i(u)}).observe(document,{childList:!0,subtree:!0});function n(a){const l={};return a.integrity&&(l.integrity=a.integrity),a.referrerPolicy&&(l.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?l.credentials="include":a.crossOrigin==="anonymous"?l.credentials="omit":l.credentials="same-origin",l}function i(a){if(a.ep)return;a.ep=!0;const l=n(a);fetch(a.href,l)}})();function AV(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Xg={exports:{}},wc={};/**
- * @license React
- * react-jsx-runtime.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */var LE;function xV(){if(LE)return wc;LE=1;var t=Symbol.for("react.transitional.element"),e=Symbol.for("react.fragment");function n(i,a,l){var u=null;if(l!==void 0&&(u=""+l),a.key!==void 0&&(u=""+a.key),"key"in a){l={};for(var h in a)h!=="key"&&(l[h]=a[h])}else l=a;return a=l.ref,{$$typeof:t,type:i,key:u,ref:a!==void 0?a:null,props:l}}return wc.Fragment=e,wc.jsx=n,wc.jsxs=n,wc}var UE;function CV(){return UE||(UE=1,Xg.exports=xV()),Xg.exports}var P=CV();const RV=()=>{};var BE={};/**
- * @license
-
----
-
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\dist\index.html
 <!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/carro-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="home.css" />
-    <title>Vite + React + TS</title>
-    <script type="module" crossorigin src="/assets/index-G_qRpUVa.js"></script>
+    <title>Serviços Rômulo</title>
+    <script type="module" crossorigin src="/assets/index-9522nsz9.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CtiMt5AR.css">
 
 ---
@@ -80,7 +80,7 @@ const Header = () => {
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\components\Sidebar.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUsers, FaTools, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaUsers, FaTools, FaSignOutAlt, FaPlus } from 'react-icons/fa'; // Importando ícone para "Cadastrar"
 import { useUser } from '../contexts/UserContext';
 import { getAuth, signOut } from 'firebase/auth';
 
@@ -157,7 +157,7 @@ import Swal from 'sweetalert2';
 interface Contato {
   tipo: string;
   valor: string;
-}
+  erro: string;
 
 ---
 
@@ -166,26 +166,40 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import servicoeRepository from '../../repositories/ServicoRepository';
+import clienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { NumericFormat } from 'react-number-format';
 import { Servico } from '../../types/Servico';
-// import { Cliente } from '../../types/Cliente';
+import { Cliente } from '../../types/Cliente';
+import Select from 'react-select';
 
-const servicosDisponiveis = [
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\CadastrarTipoServico.tsx
+import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import tipoServicoRepository from '../../repositories/TipoServicoRepository';
+import { colorAzul } from '../../values/colors';
+
+/**
+ * Componente para cadastrar, listar, editar e excluir tipos de serviço.
+ */
+const CadastrarTipoServico = () => {
+  const [tipoServico, setTipoServico] = useState<string>(''); // Nome digitado
 
 ---
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\Clientes.tsx
 // src/pages/admin/Clientes.tsx
+
 import { useEffect, useState } from 'react';
-import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Users } from 'lucide-react';
 
-interface Contato {
+// Tipagens auxiliares
 
 ---
 
@@ -205,8 +219,8 @@ const EditarCliente = () => {
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\admin\Servicos.tsx
 // src/pages/admin/Servicos.tsx
+
 import { useEffect, useState } from 'react';
-import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import ServicoRepository from '../../repositories/ServicoRepository';
@@ -219,15 +233,15 @@ interface Servico {
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\client\Dashboard.tsx
 // src/pages/client/Dashboard.tsx
+
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaUsers, FaCogs, FaSignOutAlt } from 'react-icons/fa';
+import { FaUsers, FaCogs, FaSignOutAlt, FaPlus } from 'react-icons/fa';
 import { colorAzul, colorBranco } from '../../values/colors';
 
-const Dashboard = () => {
-  const { user, logout } = useUser();
-  const navigate = useNavigate();
+/**
+ * Componente de dashboard principal após login.
 
 ---
 
@@ -246,16 +260,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 ---
 
 Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\pages\public\Agendamento.tsx
-// src/pages/public/Agendamento.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 import { FaCarSide, FaMotorcycle } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { colorAzul, colorBranco } from '../../values/colors';
 import { FaSpinner } from 'react-icons/fa'; // Ícone de spinner
-
-const servicosDisponiveis = [
+// import { db } from '../../firebase'; // Importe a instância do Firestore
+import { db } from '../../firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore';
 
 ---
 
@@ -322,10 +336,24 @@ import {
   getDoc,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FirebaseService from '../services/FirebaseService';
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\repositories\TipoServicoRepository.tsx
+import {
+  collection,
+  getDocs,
+  getDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  setDoc
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
 ---
 
@@ -367,6 +395,17 @@ export interface Servico {
     cliente?: Cliente; // cliente pode ser undefined, mas NÃO null
     criadoEm?: string;
 }
+
+---
+
+Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\src\types\TipoServico.ts
+// types/TipoServico.ts
+
+export interface TipoServico {
+    id: string;         // Identificador único do tipo de serviço
+    nome: string;       // Nome do tipo de serviço (ex: Limpeza Técnica, Polimento de Farol, etc.)
+    criadoEm: string;   // Data de criação do tipo de serviço
+  }
 
 ---
 
@@ -470,10 +509,10 @@ Arquivo: C:\Users\Developer\Desktop\ROMULO\github\servicos\index.html
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/carro-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="home.css" />
-    <title>Vite + React + TS</title>
+    <title>Serviços Rômulo</title>
   </head>
   <body>
 

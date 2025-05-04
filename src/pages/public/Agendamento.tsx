@@ -125,7 +125,7 @@ Valor: A combinar pelo WhatsApp.
 
 Aguardo um retorno, ${data.nome}!`;
 
-    const whatsappURL = `https://wa.me/5527995121602?text=${encodeURIComponent(mensagem)}`;
+    const whatsappURL = `https://wa.me/5527988792730?text=${encodeURIComponent(mensagem)}`;
     
     // Simular um pequeno tempo de carregamento para UX
     setTimeout(() => {

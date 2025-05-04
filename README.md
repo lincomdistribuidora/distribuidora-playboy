@@ -19,3 +19,37 @@
 
 - background
     - separar os dados para armazenar localmente diferentemente dos usuários públicos e privados.
+
+
+
+
+
+## Detalhe desse ponto desse commit
+
+configurado as regras do firebase em:
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Clientes: cada um só acessa o próprio documento
+    match /clientes/{userId} {
+      allow read, write: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
+    }
+
+    // Admin pode acessar tudo
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Funções auxiliares
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'yuritakeo@ucl.br';
+    }
+  }
+}
+
+### Devido Ajuste para somente o email 'yuritakeo@ucl.br' poder entrar na tela admim, falta terminar a tela dashboard do cliente do admim

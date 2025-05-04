@@ -1,9 +1,11 @@
 import Swal from 'sweetalert2';
 import React, { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import { colorAzul, colorBranco } from '../../values/colors';
+import { auth, db } from '../../firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,7 +15,6 @@ const Login = () => {
   const [nome, setNome] = useState('');
   const { setUser } = useUser();
   const navigate = useNavigate();
-  const auth = getAuth();
 
   const handleToggle = () => setIsLogin(!isLogin);
 
@@ -60,6 +61,7 @@ const Login = () => {
           });
           return;
         }
+
         if (!nome) {
           Swal.fire({
             icon: 'error',
@@ -71,10 +73,20 @@ const Login = () => {
         }
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+        const uid = userCredential.user.uid;
+
+        // Atualiza o contexto
         setUser({
           email: userCredential.user.email,
-          uid: userCredential.user.uid,
+          uid: uid,
           displayName: userCredential.user.displayName,
+        });
+
+        // Salva os dados do cliente no Firestore usando o UID como ID do documento
+        await setDoc(doc(db, 'clientes', uid), {
+          nome,
+          email,
+          endereco: '', // inicial vazio para ser editado depois
         });
 
         Swal.fire({
@@ -85,6 +97,7 @@ const Login = () => {
           timer: 3500,
           timerProgressBar: true,
         });
+
         navigate('/dashboard');
       }
     } catch (error: any) {
