@@ -73,14 +73,14 @@ const CadastrarServico = () => {
   /**
    * Filtra clientes com base no texto digitado no autocomplete
    */
-  const handleClientSearch = (search: string) => {
-    return clientes
-      .filter(cliente => cliente.nome.toLowerCase().includes(search.toLowerCase()))
-      .map(cliente => ({
-        value: cliente.id,
-        label: cliente.nome,
-      }));
-  };
+  // const handleClientSearch = (search: string) => {
+  //   return clientes
+  //     .filter(cliente => cliente.nome.toLowerCase().includes(search.toLowerCase()))
+  //     .map(cliente => ({
+  //       value: cliente.id,
+  //       label: cliente.nome,
+  //     }));
+  // };
 
   /**
    * Salva ou atualiza o serviço

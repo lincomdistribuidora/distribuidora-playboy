@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
-import servicoRepository from '../../repositories/ServicoRepository';
+// import servicoRepository from '../../repositories/ServicoRepository';
 
 interface Servico {
   id: string;
@@ -13,7 +13,8 @@ interface Servico {
 
 const MeusServicos: React.FC = () => {
   const { user } = useUser();
-  const [servicos, setServicos] = useState<Servico[]>([]);
+  const [servicos ] = useState<Servico[]>([]);
+  // const [servicos, setServicos] = useState<Servico[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -22,8 +23,8 @@ const MeusServicos: React.FC = () => {
       if (!user?.uid) return;
 
       try {
-        setLoading(true);
-        const resultado = await servicoRepository.findByClienteId(user.uid);
+        // setLoading(true);
+        // const resultado = await servicoRepository.findByClienteId(user.uid);
         
         // opcional: filtrar status = 'finalizado'
         // const finalizados = resultado.filter(servico => servico.status === 'finalizado');

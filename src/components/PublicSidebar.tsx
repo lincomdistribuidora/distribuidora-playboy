@@ -9,7 +9,7 @@ interface PublicSidebarProps {
   onClose: () => void;
 }
 
-const PublicSidebar: React.FC<PublicSidebarProps> = ({ isOpen, onClose }) => {
+const PublicSidebar: React.FC<PublicSidebarProps> = ({ isOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useUser();
