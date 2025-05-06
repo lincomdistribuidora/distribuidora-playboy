@@ -100,6 +100,25 @@ class ServicoRepository {
     };
   }
 
+  // buscar os dados do cliente logado para o cliente publicos
+  async findByClienteId(clienteId: string): Promise<Servico[]> {
+    const snapshot = await getDocs(collection(db, 'servicos'));
+  
+    return snapshot.docs
+      .filter(doc => doc.data().cliente === clienteId)
+      .map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          tipo: data.tipo || '',
+          valor: data.valor || '',
+          cliente: data.cliente, // aqui será apenas o ID, e está ok
+          criadoEm: data.criadoEm || '',
+        };
+      });
+  }
+
+
   /**
    * Atualiza um serviço existente com base no ID.
    * @param id ID do serviço a ser atualizado

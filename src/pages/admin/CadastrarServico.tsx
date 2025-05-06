@@ -152,14 +152,17 @@ const CadastrarServico = () => {
                   setServico(prev => ({
                     ...prev,
                     cliente: {
-                      id: selectedCliente.id,
+                      id: selectedCliente.id, 
                       nome: selectedCliente.nome,
                       contatos: selectedCliente.contatos,
                     }
                   }));
                 }
               }}
-              options={handleClientSearch('')}
+              options={clientes.map(cliente => ({
+                value: cliente.id,
+                label: cliente.nome,
+              }))}
               className="mt-2"
               placeholder="Digite o nome do cliente"
               required

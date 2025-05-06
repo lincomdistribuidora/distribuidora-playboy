@@ -76,11 +76,13 @@ const Login = () => {
         const uid = userCredential.user.uid;
 
         // Atualiza o contexto
-        setUser({
-          email: userCredential.user.email,
-          uid: uid,
-          displayName: userCredential.user.displayName,
-        });
+        setUser(
+          {
+            email: userCredential.user.email,
+            uid: uid,
+            displayName: userCredential.user.displayName,
+          }
+        );
 
         // Salva os dados do cliente no Firestore usando o UID como ID do documento
         await setDoc(doc(db, 'clientes', uid), {
