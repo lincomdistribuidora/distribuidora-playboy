@@ -1,47 +1,59 @@
-// src/pages/admin/Clientes.tsx
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
-import ClienteRepository from '../../repositories/ClienteRepository';
+import VendaRepository from '../../repositories/VendaRepository';
 import Swal from 'sweetalert2';
-import { Edit2, Trash2, Users } from 'lucide-react';
 
-// Tipagens auxiliares
-interface Contato {
+// import { Venda } from '../../types/Venda';
+
+// Tipagem da Venda
+interface Venda {
+  id: string;
   tipo: string;
   valor: string;
+  cliente: {
+    nome: string;
+    [key: string]: any;
+  };
+  criadoEm: string;
 }
 
-interface Cliente {
-  id: string;
-  nome: string;
-  contatos: Contato[];
-}
-
-const Clientes = () => {
+const Vendas = () => {
   const navigate = useNavigate();
-
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [vendas, setVendas] = useState<Venda[]>([]);
   const [filtro, setFiltro] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const clientesPorPagina = 10;
+  const vendasPorPagina = 10;
 
-  // Buscar todos os clientes ao carregar a tela
+  // Busca todas as vendas no repositório
+  const fetchVendas = async () => {
+    try {
+      const lista = await VendaRepository.findAll();
+      setVendas(lista.map(s => ({
+        id: s.id,
+        tipo: s.tipo || '',
+        valor: s.valor || '',
+        cliente: s.cliente || { nome: 'Cliente não informado' },
+        criadoEm: s.criadoEm || '',
+      })));
+    } catch (error) {
+      console.error('Erro ao buscar vendas:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchClientes = async () => {
-      const lista = await ClienteRepository.findAll();
-      setClientes(lista);
-    };
-    fetchClientes();
+    fetchVendas();
   }, []);
 
-  // Ações de navegação
-  const handleEditar = (id: string) => navigate(`/cadastrar-cliente/${id}`);
-  const handleCadastrar = () => navigate('/cadastrar-cliente');
+  // Navegação e ações
+  const handleEditar = (id: string) => {
+    console.log("Editando venda, ID recebido:", id);
+    navigate(`../cadastrar-venda/${id}`);
+  };
+
+  const handleCadastrar = () => navigate('/cadastrar-venda');
   const handleDashboard = () => navigate('/dashboard');
 
-  // Excluir cliente com confirmação
   const handleExcluir = async (id: string) => {
     const result = await Swal.fire({
       title: 'Tem certeza?',
@@ -55,23 +67,28 @@ const Clientes = () => {
     });
 
     if (result.isConfirmed) {
-      await ClienteRepository.remove(id);
-      setClientes(clientes.filter((c) => c.id !== id));
-      Swal.fire('Excluído!', 'O cliente foi removido com sucesso.', 'success');
+      try {
+        console.log('Excluindo venda ID:', id);
+        await VendaRepository.remove(id);
+        await fetchVendas();
+        Swal.fire('Excluído!', 'A venda foi removida com sucesso.', 'success');
+      } catch (error) {
+        console.error('Erro ao excluir venda:', error);
+        Swal.fire('Erro!', 'Não foi possível excluir a venda.', 'error');
+      }
     }
   };
 
-  // Filtrar e ordenar clientes por nome (A-Z)
-  const clientesFiltrados = clientes
-    .filter(cliente =>
-      JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase())
+  // Filtragem e Paginação
+  const vendasFiltradas = vendas
+    .filter((venda) =>
+      JSON.stringify(venda).toLowerCase().includes(filtro.toLowerCase())
     )
-    .sort((a, b) => a.nome.localeCompare(b.nome));
+    .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
 
-  // Paginação
-  const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
-  const indiceInicial = (paginaAtual - 1) * clientesPorPagina;
-  const clientesPaginados = clientesFiltrados.slice(indiceInicial, indiceInicial + clientesPorPagina);
+  const totalPaginas = Math.ceil(vendasFiltradas.length / vendasPorPagina);
+  const indiceInicial = (paginaAtual - 1) * vendasPorPagina;
+  const vendasPaginadas = vendasFiltradas.slice(indiceInicial, indiceInicial + vendasPorPagina);
 
   const mudarPagina = (novaPagina: number) => {
     if (novaPagina >= 1 && novaPagina <= totalPaginas) {
@@ -81,13 +98,13 @@ const Clientes = () => {
 
   return (
     <div className="container mt-4">
-      {/* Botões principais */}
+      {/* Botões de ação */}
       <div style={styles.botoesContainer}>
         <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">
           Voltar ao Dashboard
         </button>
         <button onClick={handleCadastrar} className="btn btn-success w-100">
-          Cadastrar Cliente
+          Lançar Venda
         </button>
       </div>
 
@@ -95,49 +112,40 @@ const Clientes = () => {
       <input
         type="text"
         className="form-control mb-4"
-        placeholder="Buscar cliente..."
+        placeholder="Buscar venda..."
         value={filtro}
         onChange={(e) => {
           setFiltro(e.target.value);
-          setPaginaAtual(1); // Reiniciar para página 1 ao filtrar
+          setPaginaAtual(1);
         }}
         style={styles.inputBusca}
       />
 
-      {/* Lista de clientes ou mensagem de vazio */}
-      {clientesFiltrados.length === 0 ? (
-        <p className="text-center">Nenhum cliente encontrado.</p>
+      {/* Lista de vendas ou mensagem de vazio */}
+      {vendasFiltradas.length === 0 ? (
+        <p className="text-center">Nenhuma venda encontrada.</p>
       ) : (
-        clientesPaginados.map((cliente) => (
-          <div key={cliente.id} style={styles.card}>
+        vendasPaginadas.map((venda, index) => (
+          <div key={venda.id || `venda-${index}`} style={styles.card}>
             <div style={styles.cardBody}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Users size={32} strokeWidth={2} color={colorAzul} />
-                <div>
-                  <strong style={{ fontSize: '18px' }}>{cliente.nome}</strong>
-                  <br />
-                  <small style={{ fontSize: '14px' }}>
-                    {cliente.contatos?.length
-                      ? cliente.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ')
-                      : 'Sem contato'}
-                  </small>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <strong style={{ fontSize: '18px', color: colorAzul }}>
+                  {venda.cliente?.nome}
+                </strong>
+                <small style={{ fontSize: '14px' }}>
+                  {venda.tipo} | R$ {Number(venda.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </small>
+                <small style={{ fontSize: '12px', color: '#888' }}>
+                  Criado em: {new Date(venda.criadoEm).toLocaleDateString('pt-BR')}
+                </small>
               </div>
 
               <div style={styles.botoesCard}>
-                <button
-                  onClick={() => handleEditar(cliente.id)}
-                  className="btn btn-primary btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <Edit2 size={16} /> Editar
+                <button onClick={() => handleEditar(venda.id)} className="btn btn-primary btn-sm">
+                  Editar
                 </button>
-                <button
-                  onClick={() => handleExcluir(cliente.id)}
-                  className="btn btn-danger btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <Trash2 size={16} /> Excluir
+                <button onClick={() => handleExcluir(venda.id)} className="btn btn-danger btn-sm">
+                  Excluir
                 </button>
               </div>
             </div>
@@ -181,12 +189,6 @@ const Clientes = () => {
 
 // Estilização inline
 const styles = {
-  titulo: {
-    color: colorAzul,
-    fontSize: '1.8rem',
-    marginBottom: '1rem',
-    paddingLeft: '8px',
-  },
   botoesContainer: {
     display: 'flex',
     flexDirection: 'column' as const,
@@ -219,4 +221,4 @@ const styles = {
   },
 };
 
-export default Clientes;
+export default Vendas;

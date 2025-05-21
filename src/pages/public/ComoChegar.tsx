@@ -1,51 +1,63 @@
-// src/pages/public/ComoChegar.tsx
-import { colorAzul, colorBranco } from '../../values/colors';
-import { FaMapMarkedAlt } from 'react-icons/fa';
+import imagem from '../../../img/background4.png';
 
 const ComoChegar = () => {
-  // Função para lidar com a mudança de cor ao passar o mouse
-  const handleMouseOver = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const target = e.target as HTMLAnchorElement;  // Cast para HTMLAnchorElement
-    target.style.backgroundColor = '#1b4c99';
-  };
-
-  const handleMouseOut = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const target = e.target as HTMLAnchorElement;  // Cast para HTMLAnchorElement
-    target.style.backgroundColor = colorAzul;
-  };
-
   return (
-    <div className="d-flex justify-content-center align-items-center py-5" style={{ backgroundColor: '#f9f9f9', minHeight: '80vh' }}>
-      <div
-        className="shadow p-5 rounded"
-        style={{ backgroundColor: '#fff', maxWidth: '600px', width: '100%', textAlign: 'center' }}
-      >
-        <h2 style={{ color: colorAzul }} className="mb-4">📍 Como Chegar</h2>
-        <p style={{ color: '#555', fontSize: '1.1rem' }}>
-          Clique no botão abaixo para visualizar nossa localização no mapa.
-        </p>
+    <div style={{ 
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      overflow: "hidden",
+      backgroundColor: "#111", // Fundo escuro caso a largura ultrapasse
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}>
+      
+      {/* Imagem de fundo centralizada */}
+      <img 
+        src={imagem} 
+        alt="Distribuidora Play Boy" 
+        style={{
+          height: "100vh", // Garante que a altura total da imagem seja visível
+          width: "auto", // Mantém a proporção da imagem
+          maxWidth: "100vw", // Impede que a imagem fique maior que a tela
+        }}
+      />
 
-        <a
-          href="https://www.google.com/maps?q=-20.193616859143418,-40.25542379513"
-          className="btn mt-4 d-flex align-items-center justify-content-center gap-2"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            backgroundColor: colorAzul,
-            color: colorBranco,
-            fontWeight: 'bold',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            transition: 'background-color 0.3s ease',
-          }}
-          onMouseOver={handleMouseOver}
-          onMouseOut={handleMouseOut}
-        >
-          <FaMapMarkedAlt size={20} />
-          Ver no Mapa
-        </a>
-      </div>
+      {/* Área clicável do Instagram - Metade inferior esquerda */}
+      <a
+        href="https://www.instagram.com/playybebidas/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: "absolute",
+          left: "0",
+          bottom: "0",
+          width: "50%",
+          height: "50%",
+          opacity: 0, // Invisível
+          cursor: "pointer",
+        }}
+      ></a>
+
+      {/* Área clicável da localização - Metade inferior direita */}
+      <a
+        href="https://www.google.com/maps?q=-20.41810,-40.33346"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: "0",
+          width: "50%",
+          height: "50%",
+          opacity: 0, // Invisível
+          cursor: "pointer",
+        }}
+      ></a>
+
     </div>
   );
 };

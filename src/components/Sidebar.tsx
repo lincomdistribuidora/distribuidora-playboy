@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUsers, FaTools, FaSignOutAlt, FaPlus } from 'react-icons/fa'; // Importando ícone para "Cadastrar"
+import { FaHome, FaUsers, FaMoneyBillWave, FaSignOutAlt, FaPlus } from 'react-icons/fa'; // Importando ícone para "Cadastrar"
 import { useUser } from '../contexts/UserContext';
 import { getAuth, signOut } from 'firebase/auth';
+
+import imagem from '../../img/logo.jpeg'
 
 interface SidebarProps {
   isOpen: boolean;
@@ -58,6 +60,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     fontWeight: 'bold',
   };
 
+  const logoStyle: React.CSSProperties = {
+    width: '100px',
+    height: '100px',
+  };
+
   const navStyle: React.CSSProperties = {
     flexGrow: 1,
     overflowY: 'auto',
@@ -103,8 +110,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         )}
         {/* Header */}
         <div style={headerStyle}>
-          <div style={{ fontSize: '2rem' }}>🧽</div>
-          Serviços <span style={{ color: '#ffc107' }}>Rômulo</span>
+          <img src={imagem} alt="loco lincom" style={logoStyle} />
+          {/* <div style={{ fontSize: '2rem' }}>🧽</div> */}
+          {/* Serviços <span style={{ color: '#ffc107' }}>Lincom</span> */}
         </div>
       </div>
 
@@ -116,8 +124,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </Link>
 
         {/* Cadastrar Tipo de Serviço */}
-        <Link to="/cadastrar-tipo-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-tipo-servico' ? activeLinkStyle : {}) }}>
+        {/* <Link to="/cadastrar-tipo-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-tipo-servico' ? activeLinkStyle : {}) }}>
           <FaPlus style={iconStyle} /> Cadastrar Tipo de Serviço
+        </Link> */}
+
+        {/* Cadastrar Cliente */}
+        <Link to="/cadastrar-cliente" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-cliente' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Cadastrar Cliente
         </Link>
 
         {/* Clientes */}
@@ -125,20 +138,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <FaUsers style={iconStyle} /> Clientes
         </Link>
 
-        {/* Cadastrar Cliente */}
-        <Link to="/cadastrar-cliente" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-cliente' ? activeLinkStyle : {}) }}>
-          <FaPlus style={iconStyle} /> Cadastrar Cliente
+        {/* Cadastrar Produtos */}
+        <Link to="/cadastrar-produto" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-produto' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Cadastrar Produto
         </Link>
+
+        {/* Produtos */}
+        <Link to="/produtos" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/produtos' ? activeLinkStyle : {}) }}>
+          <FaUsers style={iconStyle} /> Produtos
+        </Link>
+
+        {/* Vendas */}
+        <Link to="/vendas" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/vendas' ? activeLinkStyle : {}) }}>
+          <FaMoneyBillWave style={iconStyle} /> Vendas
+        </Link>
+
+        {/* Lançar Venda */}
+        <Link to="/cadastrar-venda" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-venda' ? activeLinkStyle : {}) }}>
+          <FaPlus style={iconStyle} /> Lançar Venda
+        </Link>
+
+
 
         {/* Serviços */}
-        <Link to="/servicos" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/servicos' ? activeLinkStyle : {}) }}>
+        {/* <Link to="/servicos" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/servicos' ? activeLinkStyle : {}) }}>
           <FaTools style={iconStyle} /> Serviços
-        </Link>
+        </Link> */}
 
         {/* Cadastrar Serviço */}
-        <Link to="/cadastrar-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-servico' ? activeLinkStyle : {}) }}>
+        {/* <Link to="/cadastrar-servico" onClick={handleLinkClick} style={{ ...linkStyle, ...(location.pathname === '/cadastrar-servico' ? activeLinkStyle : {}) }}>
           <FaPlus style={iconStyle} /> Cadastrar Serviço
-        </Link>
+        </Link> */}
       </nav>
 
       {/* Botão Sair */}

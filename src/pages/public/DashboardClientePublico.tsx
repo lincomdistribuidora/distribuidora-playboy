@@ -22,15 +22,15 @@ const DashboardClientePublico = () => {
   // Opções do menu do cliente
   const menuOptions = [
     {
-      label: 'Meus Agendamentos',
+      label: 'Minhas pendencias',
       icon: <FaClock size={20} />,
       onClick: () => navigate('/meus-agendamentos'),
     },
-    {
-      label: 'Histórico de Serviços',
-      icon: <FaCheckCircle size={20} />,
-      onClick: () => navigate('/meus-servicos'),
-    },
+    // {
+    //   label: 'Histórico de Serviços',
+    //   icon: <FaCheckCircle size={20} />,
+    //   onClick: () => navigate('/meus-servicos'),
+    // },
   ];
 
   return (

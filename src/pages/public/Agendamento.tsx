@@ -109,7 +109,7 @@ const Agendamento = () => {
 
     setIsLoading(true);
 
-    const mensagem = `Olá Rômulo! Meu nome é ${data.nome} e quero fazer um orçamento dos seguintes serviços:
+    const mensagem = `Olá Limcom! Meu nome é ${data.nome} e quero fazer um orçamento dos seguintes serviços:
 
 Tipo de veículo:
  - ${tipoSelecionado === "carro" ? `Carro (${data.tipoCarro || "Tipo não informado"})` : "Moto"}

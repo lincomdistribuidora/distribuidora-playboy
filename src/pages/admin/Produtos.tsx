@@ -1,47 +1,51 @@
-// src/pages/admin/Clientes.tsx
+// src/pages/admin/Produtos.tsx
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
-import ClienteRepository from '../../repositories/ClienteRepository';
+// import ProdutoRepository from '../../repositories/ProdutoRepository';
+import ProdutoRepository from '../../repositories/ProdutoRepository';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Users } from 'lucide-react';
+import { FaUsers, FaBeer, FaSignOutAlt, FaPlus } from 'react-icons/fa';
 
 // Tipagens auxiliares
-interface Contato {
-  tipo: string;
-  valor: string;
-}
+// interface Contato {
+//   tipo: string;
+//   valor: string;
+// }
 
-interface Cliente {
+interface Produto {
   id: string;
   nome: string;
-  contatos: Contato[];
+  valorVenda: string;
+  quantidadeEstoque: string;
+  // contatos: Contato[];
 }
 
-const Clientes = () => {
+const Produtos = () => {
   const navigate = useNavigate();
 
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [filtro, setFiltro] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const clientesPorPagina = 10;
+  const produtosPorPagina = 10;
 
-  // Buscar todos os clientes ao carregar a tela
+  // Buscar todos os produtos ao carregar a tela
   useEffect(() => {
-    const fetchClientes = async () => {
-      const lista = await ClienteRepository.findAll();
-      setClientes(lista);
+    const fetchProdutos = async () => {
+      const lista = await ProdutoRepository.findAll();
+      setProdutos(lista);
     };
-    fetchClientes();
+    fetchProdutos();
   }, []);
 
   // Ações de navegação
-  const handleEditar = (id: string) => navigate(`/cadastrar-cliente/${id}`);
-  const handleCadastrar = () => navigate('/cadastrar-cliente');
+  const handleEditar = (id: string) => navigate(`/cadastrar-produto/${id}`);
+  const handleCadastrar = () => navigate('/cadastrar-produto');
   const handleDashboard = () => navigate('/dashboard');
 
-  // Excluir cliente com confirmação
+  // Excluir produto com confirmação
   const handleExcluir = async (id: string) => {
     const result = await Swal.fire({
       title: 'Tem certeza?',
@@ -55,23 +59,23 @@ const Clientes = () => {
     });
 
     if (result.isConfirmed) {
-      await ClienteRepository.remove(id);
-      setClientes(clientes.filter((c) => c.id !== id));
-      Swal.fire('Excluído!', 'O cliente foi removido com sucesso.', 'success');
+      await ProdutoRepository.delete(id);
+      setProdutos(produtos.filter((c) => c.id !== id));
+      Swal.fire('Excluído!', 'O produto foi removido com sucesso.', 'success');
     }
   };
 
-  // Filtrar e ordenar clientes por nome (A-Z)
-  const clientesFiltrados = clientes
-    .filter(cliente =>
-      JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase())
+  // Filtrar e ordenar produtoss por nome (A-Z)
+  const produtosFiltrados = produtos
+    .filter(produto =>
+      JSON.stringify(produto).toLowerCase().includes(filtro.toLowerCase())
     )
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   // Paginação
-  const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
-  const indiceInicial = (paginaAtual - 1) * clientesPorPagina;
-  const clientesPaginados = clientesFiltrados.slice(indiceInicial, indiceInicial + clientesPorPagina);
+  const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
+  const indiceInicial = (paginaAtual - 1) * produtosPorPagina;
+  const produtosPaginados = produtosFiltrados.slice(indiceInicial, indiceInicial + produtosPorPagina);
 
   const mudarPagina = (novaPagina: number) => {
     if (novaPagina >= 1 && novaPagina <= totalPaginas) {
@@ -87,7 +91,7 @@ const Clientes = () => {
           Voltar ao Dashboard
         </button>
         <button onClick={handleCadastrar} className="btn btn-success w-100">
-          Cadastrar Cliente
+          Cadastrar Produto
         </button>
       </div>
 
@@ -95,7 +99,7 @@ const Clientes = () => {
       <input
         type="text"
         className="form-control mb-4"
-        placeholder="Buscar cliente..."
+        placeholder="Buscar produto..."
         value={filtro}
         onChange={(e) => {
           setFiltro(e.target.value);
@@ -104,36 +108,39 @@ const Clientes = () => {
         style={styles.inputBusca}
       />
 
-      {/* Lista de clientes ou mensagem de vazio */}
-      {clientesFiltrados.length === 0 ? (
-        <p className="text-center">Nenhum cliente encontrado.</p>
+      {/* Lista de produtos ou mensagem de vazio */}
+      {produtosFiltrados.length === 0 ? (
+        <p className="text-center">Nenhum produto encontrado.</p>
       ) : (
-        clientesPaginados.map((cliente) => (
-          <div key={cliente.id} style={styles.card}>
+        produtosPaginados.map((produto) => (
+          <div key={produto.id} style={styles.card}>
             <div style={styles.cardBody}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Users size={32} strokeWidth={2} color={colorAzul} />
+                <FaBeer size={32} strokeWidth={2} color={colorAzul} />
                 <div>
-                  <strong style={{ fontSize: '18px' }}>{cliente.nome}</strong>
+                  <strong style={{ fontSize: '18px' }}>{produto.nome}</strong>
                   <br />
                   <small style={{ fontSize: '14px' }}>
-                    {cliente.contatos?.length
-                      ? cliente.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ')
-                      : 'Sem contato'}
+                    Valor de Venda: {'R$ ' + produto.valorVenda}
+                    {/* {produto.contatos?.length
+                      ? produto.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ')
+                      : 'Sem valor de venda'} */}
                   </small>
+                  <br />
+                  <strong style={{ fontSize: '10px' }}>Quantidade: {produto.quantidadeEstoque}</strong>
                 </div>
               </div>
 
               <div style={styles.botoesCard}>
                 <button
-                  onClick={() => handleEditar(cliente.id)}
+                  onClick={() => handleEditar(produto.id)}
                   className="btn btn-primary btn-sm"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   <Edit2 size={16} /> Editar
                 </button>
                 <button
-                  onClick={() => handleExcluir(cliente.id)}
+                  onClick={() => handleExcluir(produto.id)}
                   className="btn btn-danger btn-sm"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
@@ -219,4 +226,4 @@ const styles = {
   },
 };
 
-export default Clientes;
+export default Produtos;

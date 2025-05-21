@@ -1,20 +1,40 @@
+// src/types/Cliente.ts
+
+/**
+ * Representa um tipo de contato do cliente, como telefone ou email.
+ */
 export interface Contato {
-    tipo: string;
-    valor: string;
-  }
-  
-  export interface Endereco {
-    rua: string;
-    numero: string;
-    bairro: string;
-    cidade: string;
-    estado: string;
-    cep: string;
-  }
-  
-  export interface Cliente {
-    id: string;
-    nome: string;
-    contatos: Contato[];
-    endereco?: Endereco; // Use `endereco?` se ele puder ser opcional
-  }
+  tipo: string;   // Exemplo: 'telefone', 'email'
+  valor: string;  // Exemplo: '(11) 91234-5678', 'exemplo@email.com'
+}
+
+/**
+ * Representa o endereço do cliente.
+ */
+export interface Endereco {
+  rua: string;           // Nome da rua
+  numero: string;        // Número do imóvel
+  bairro: string;        // Bairro
+  cidade: string;        // Cidade
+  estado: string;        // Estado (sigla)
+  cep: string;           // Código postal
+}
+
+/**
+ * Representa um cliente do sistema.
+ * 
+ * O campo `saldo` indica:
+ * - valores negativos = débito do cliente
+ * - valores positivos = crédito do cliente
+ * - valor 0 = sem saldo
+ * 
+ * O campo `saldo` agora é obrigatório para evitar verificações de undefined em tempo de execução.
+ * Se estiver lidando com dados antigos, inicialize como 0 ao carregar do banco.
+ */
+export interface Cliente {
+  id: string;                   // Identificador único no banco
+  nome: string;                 // Nome completo do cliente
+  contatos: Contato[];          // Lista de contatos (telefone, email, etc.)
+  endereco?: Endereco;          // Endereço do cliente (opcional)
+  saldo: number;                // Saldo do cliente (obrigatório para evitar undefined)
+}

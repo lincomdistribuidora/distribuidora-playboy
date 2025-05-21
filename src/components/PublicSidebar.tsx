@@ -69,13 +69,13 @@ const PublicSidebar: React.FC<PublicSidebarProps> = ({ isOpen }) => {
           <FiHome /> Dashboard
         </Link>
 
-        <Link to="/meus-agendamentos" style={linkStyle('/meus-agendamentos')}>
+        {/* <Link to="/meus-agendamentos" style={linkStyle('/meus-agendamentos')}>
           <FiClock /> Meus Agendamentos
         </Link>
 
         <Link to="/meus-servicos" style={linkStyle('/meus-servicos')}>
           <FiCalendar /> Histórico de Serviços
-        </Link>
+        </Link> */}
 
         <button
           onClick={handleLogout}

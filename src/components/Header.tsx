@@ -2,17 +2,26 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { colorBranco } from '../values/colors';
 
+import imagem from '../../img/logo.jpeg'
+
 const Header = () => {
   const location = useLocation();
   const [isDark ] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false); // Estado para controle do menu
 
+  const logoStyle: React.CSSProperties = {
+    width: '100px',
+    height: '100px',
+  };
+  
+
+
   const toggleMenu = () => setMenuAberto(!menuAberto); // Alterna estado do menu
 
   const navLinks = [
     { to: '/', label: 'Home' },
-    { to: '/agendamento', label: 'Agendar' },
-    { to: '/como-chegar', label: 'Como Chegar' },
+    // { to: '/agendamento', label: 'Agendar' },
+    // { to: '/como-chegar', label: 'Como Chegar' },
     { to: '/login', label: 'Login', isButton: true },
   ];
 
@@ -21,14 +30,16 @@ const Header = () => {
       className="navbar navbar-expand-lg shadow-sm sticky-top"
       style={{
         backdropFilter: 'blur(8px)',
-        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(13, 71, 161, 0.9)',
+        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.9)',
         transition: 'background-color 0.3s ease',
       }}
     >
       <div className="container">
         <Link className="navbar-brand fw-bold fs-4 d-flex align-items-center" to="/" style={{ color: colorBranco }}>
-          <span style={{ letterSpacing: '1px' }}>🧽 Serviços</span>
-          <span className="text-warning ms-1">Rômulo</span>
+          <img src={imagem} alt="logo lincom" style={logoStyle} />
+          
+          {/* <span style={{ letterSpacing: '1px' }}>Serviços</span>
+          <span className="text-warning ms-1">Lincom</span> */}
         </Link>
 
         {/* Botão do menu hambúrguer */}

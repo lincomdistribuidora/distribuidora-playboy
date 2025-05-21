@@ -124,9 +124,9 @@ const CadastrarTipoServico = () => {
   return (
     <div className="menu-responsivel">
       <div className="container mt-5" style={{ backgroundColor: '#ffffff', padding: 20, borderRadius: 8 }}>
-        <h2 style={{ color: colorAzul }}>
+        {/* <h2 style={{ color: colorAzul }}>
           {editingId ? 'Editar Tipo de Serviço' : 'Cadastrar Tipo de Serviço'}
-        </h2>
+        </h2> */}
 
         {/* Formulário */}
         <form onSubmit={handleSubmit}>

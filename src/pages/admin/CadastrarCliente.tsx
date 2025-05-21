@@ -1,8 +1,11 @@
+// src/pages/cliente/CadastrarCliente.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { colorAzul, colorBranco } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
+import { NumericFormat } from 'react-number-format';
 
 interface Contato {
   tipo: string;
@@ -25,7 +28,8 @@ const CadastrarCliente = () => {
     cep: '',
   });
 
-  // Máscara para telefone/whatsapp
+  const [saldo, setSaldo] = useState(0); // Saldo positivo (débito) ou negativo (crédito)
+
   const applyMask = (tipo: string, value: string): string => {
     value = value.replace(/\D/g, '');
     if (tipo === 'Telefone' || tipo === 'WhatsApp') {
@@ -36,7 +40,6 @@ const CadastrarCliente = () => {
     return value;
   };
 
-  // Validação para tipos de contato
   const validateContato = (tipo: string, valor: string): string => {
     if (!valor.trim()) return 'Campo obrigatório';
 
@@ -53,7 +56,6 @@ const CadastrarCliente = () => {
     return '';
   };
 
-  // Buscar dados se for edição
   useEffect(() => {
     if (id) {
       ClienteRepository.findById(id)
@@ -69,25 +71,23 @@ const CadastrarCliente = () => {
             setEndereco(cliente.endereco || {
               rua: '', numero: '', bairro: '', cidade: '', estado: '', cep: ''
             });
+            setSaldo(Number(cliente.saldo || 0));
           }
         })
         .catch(console.error);
     }
   }, [id]);
 
-  // Adicionar novo contato
   const handleAddContato = () => {
     setContatos([...contatos, { tipo: '', valor: '', erro: '' }]);
   };
 
-  // Remover contato
   const handleRemoveContato = (index: number) => {
     const updated = [...contatos];
     updated.splice(index, 1);
     setContatos(updated);
   };
 
-  // Atualizar tipo do contato e limpar valor
   const handleTipoChange = (index: number, value: string) => {
     const updated = [...contatos];
     updated[index].tipo = value;
@@ -96,7 +96,6 @@ const CadastrarCliente = () => {
     setContatos(updated);
   };
 
-  // Atualizar valor e validar automaticamente
   const handleContatoChange = (index: number, value: string) => {
     const updated = [...contatos];
     const tipo = updated[index].tipo;
@@ -110,14 +109,11 @@ const CadastrarCliente = () => {
     setContatos(updated);
   };
 
-  // Envio do formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Remove contatos totalmente vazios
     const contatosPreenchidos = contatos.filter(c => c.tipo || c.valor);
 
-    // Valida apenas os preenchidos
     const contatosValidados = contatosPreenchidos.map((c) => ({
       ...c,
       erro: validateContato(c.tipo, c.valor),
@@ -125,7 +121,6 @@ const CadastrarCliente = () => {
 
     const contatosValidos = contatosValidados.filter(c => !c.erro && c.tipo && c.valor);
 
-    // Verifica se ao menos um contato válido está presente
     if (contatosValidos.length === 0) {
       await Swal.fire({
         icon: 'warning',
@@ -142,6 +137,7 @@ const CadastrarCliente = () => {
       nome,
       contatos: contatosValidos.map(({ tipo, valor }) => ({ tipo, valor })),
       endereco,
+      saldo, // campo unificado de crédito/débito
       criadoEm: new Date().toISOString(),
     };
 
@@ -176,7 +172,6 @@ const CadastrarCliente = () => {
         <h2 style={{ color: colorAzul }}>{id ? 'Editar Cliente' : 'Cadastrar Cliente'}</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* Nome */}
           <div className="mt-3">
             <label>Nome:</label>
             <input
@@ -188,7 +183,6 @@ const CadastrarCliente = () => {
             />
           </div>
 
-          {/* Contatos */}
           <div className="mt-3">
             <label>Contatos:</label>
             {contatos.map((contato, index) => (
@@ -206,7 +200,7 @@ const CadastrarCliente = () => {
                   </select>
                   <input
                     type="text"
-                    placeholder="ex: (xx) xxxxx-xxxx ou email@dominio.com"
+                    placeholder="(xx) xxxxx-xxxx ou email@dominio.com"
                     value={contato.valor}
                     onChange={(e) => handleContatoChange(index, e.target.value)}
                     className={`form-control ${contato.erro ? 'is-invalid' : ''}`}
@@ -232,23 +226,43 @@ const CadastrarCliente = () => {
             </button>
           </div>
 
-          {/* Endereço */}
-          <div className="mt-4">
-            <label>Endereço:</label>
-            {['rua', 'numero', 'bairro', 'cidade', 'estado', 'cep'].map((campo) => (
-              <input
-                key={campo}
-                type="text"
-                placeholder={campo[0].toUpperCase() + campo.slice(1)}
-                value={endereco[campo as keyof typeof endereco]}
-                onChange={(e) => setEndereco({ ...endereco, [campo]: e.target.value })}
-                className="form-control mt-2"
-                required
+          {/* Campo de saldo com máscara e seletor de tipo (débito ou crédito) */}
+          <div className="mt-3">
+            <label>Saldo com o cliente:</label>
+            <div className="d-flex gap-2">
+              <select
+                value={saldo < 0 ? 'credito' : 'debito'}
+                onChange={(e) => {
+                  const tipo = e.target.value;
+                  setSaldo((prev) => Math.abs(prev) * (tipo === 'credito' ? -1 : 1));
+                }}
+                className="form-control"
+                style={{ maxWidth: 150 }}
+              >
+                <option value="debito">Débito</option>
+                <option value="credito">Crédito</option>
+              </select>
+              <NumericFormat
+                value={Math.abs(saldo)}
+                thousandSeparator="."
+                decimalSeparator=","
+                decimalScale={2}
+                fixedDecimalScale
+                prefix="R$ "
+                className="form-control"
+                onValueChange={(values) => {
+                  const valor = values.floatValue || 0;
+                  setSaldo(saldo < 0 ? -valor : valor);
+                }}
               />
-            ))}
+            </div>
+            <div className="mt-1">
+              {saldo < 0 && <span className="text-danger">💸 Cliente deve R$ {saldo.toFixed(2)}</span>}
+              {saldo > 0 && <span className="text-success">💰 Cliente tem crédito de R$ {Math.abs(saldo).toFixed(2)}</span>}
+              {saldo === 0 && <span className="text-muted">Cliente sem saldo pendente</span>}
+            </div>
           </div>
 
-          {/* Botões */}
           <div className="mt-4 d-flex gap-2">
             <button type="submit" className="btn btn-success">
               {id ? 'Salvar Alterações' : 'Salvar Cliente'}

@@ -3,7 +3,7 @@
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaUsers, FaCogs, FaSignOutAlt, FaPlus } from 'react-icons/fa';
+import { FaUsers, FaBeer, FaSignOutAlt, FaPlus, FaMoneyBillWave } from 'react-icons/fa';
 import { colorAzul, colorBranco } from '../../values/colors';
 
 /**
@@ -19,31 +19,52 @@ const Dashboard = () => {
    * A ordem segue: Cadastrar Tipo de Serviço, Cliente, Cadastrar Cliente, Serviço, Cadastrar Serviço.
    */
   const menuOptions = [
+    // {
+    //   label: 'Cadastrar Tipo de Serviço',
+    //   icon: <FaPlus size={22} />,
+    //   onClick: () => navigate('/cadastrar-tipo-servico', { replace: true }),
+    // },
     {
-      label: 'Cadastrar Tipo de Serviço',
-      icon: <FaPlus size={22} />,
-      onClick: () => navigate('/cadastrar-tipo-servico', { replace: true }),
+      label: 'Cadastrar Cliente',
+      icon: <> <FaPlus size={22} /> <FaUsers size={22} /> </>,
+      onClick: () => navigate('/cadastrar-cliente', { replace: true }),
     },
     {
       label: 'Clientes',
       icon: <FaUsers size={22} />,
       onClick: () => navigate('/clientes', { replace: true }),
     },
+
     {
-      label: 'Cadastrar Cliente',
-      icon: <FaPlus size={22} />,
-      onClick: () => navigate('/cadastrar-cliente', { replace: true }),
+      label: 'Cadastrar Produto',
+      icon: <> <FaPlus size={22} /> <FaBeer size={22} /> </>,
+      onClick: () => navigate('/cadastrar-produto', { replace: true }),
     },
     {
-      label: 'Serviços',
-      icon: <FaCogs size={22} />,
-      onClick: () => navigate('/servicos', { replace: true }),
+      label: 'Produtos',
+      icon: <FaBeer size={22} />,
+      onClick: () => navigate('/produtos', { replace: true }),
     },
     {
-      label: 'Cadastrar Serviço',
-      icon: <FaPlus size={22} />,
-      onClick: () => navigate('/cadastrar-servico', { replace: true }),
+      label: 'Lançar Venda',
+      icon: <> <FaPlus size={22} /> <FaBeer size={22} /> </>,
+      onClick: () => navigate('/cadastrar-venda', { replace: true }),
     },
+    {
+      label: 'Vendas',
+      icon: <> <FaMoneyBillWave size={22} /> </>,
+      onClick: () => navigate('/vendas', { replace: true }),
+    },
+    // {
+    //   label: 'Serviços',
+    //   icon: <FaCogs size={22} />,
+    //   onClick: () => navigate('/servicos', { replace: true }),
+    // },
+    // {
+    //   label: 'Cadastrar Serviço',
+    //   icon: <FaPlus size={22} />,
+    //   onClick: () => navigate('/cadastrar-servico', { replace: true }),
+    // },
   ];
 
   return (

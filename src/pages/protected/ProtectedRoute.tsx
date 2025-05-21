@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   // Verifica se o e-mail do usuário é o correto (admin)
-  if (user.email !== 'yuritakeo@ucl.br') {
+  if (user.email !== 'lincom@email.com') {
     // Se o e-mail não for o correto, redireciona para a página de cliente público
     return <Navigate to="/dashboard-cliente-publico" />;
   }
