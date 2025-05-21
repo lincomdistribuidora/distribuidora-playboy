@@ -47,6 +47,8 @@ const Produtos = () => {
 
   // Excluir produto com confirmação
   const handleExcluir = async (id: string) => {
+    console.log('Excluindo produto com ID:', id); // 👈 Adicione isso
+
     const result = await Swal.fire({
       title: 'Tem certeza?',
       text: 'Essa ação não poderá ser desfeita!',

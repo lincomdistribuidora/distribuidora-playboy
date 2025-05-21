@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import ProdutoRepository from '../../repositories/ProdutoRepository';
 import Swal from 'sweetalert2';
+import { NumericFormat } from 'react-number-format';
 
 // interface Contato {
 //   tipo: string;
@@ -15,7 +16,7 @@ const CadastrarProduto = () => {
   const { id } = useParams();
 
   const [nome, setNome] = useState('');
-  const [valorVenda, setValorVenda] = useState('');
+  const [valorVenda, setValorVenda] = useState<number>(0);
   const [quantidadeEstoque, setQuantidadeEstoque] = useState('');
 
   // const [contatos, setContatos] = useState<Contato[]>([{ tipo: '', valor: '', erro: '' }]);
@@ -188,12 +189,15 @@ const CadastrarProduto = () => {
           {/* Valor de venda */}
           <div className="mt-3">
             <label>Valor Venda:</label>
-            <input
-              type="text"
+            <NumericFormat
               value={valorVenda}
-              onChange={(e) => setValorVenda(e.target.value)}
+              onValueChange={(values) => setValorVenda(values.floatValue || 0)}
+              prefix="R$ "
+              decimalSeparator=","
+              thousandSeparator="."
               className="form-control"
-              required
+              placeholder="Valor"
+              allowNegative={false}
             />
           </div>
 
@@ -201,7 +205,7 @@ const CadastrarProduto = () => {
           <div className="mt-3">
             <label>Quantidade Estoque:</label>
             <input
-              type="text"
+              type="number"
               value={quantidadeEstoque}
               onChange={(e) => setQuantidadeEstoque(e.target.value)}
               className="form-control"
@@ -209,7 +213,7 @@ const CadastrarProduto = () => {
             />
           </div>
 
-          
+
 
           {/* Botões */}
           <div className="mt-4 d-flex gap-2">

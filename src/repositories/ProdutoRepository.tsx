@@ -8,6 +8,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteDoc, // <-- importar deleteDoc
 } from 'firebase/firestore';
 import { Produto } from '../types/Produto';
 
@@ -41,10 +42,17 @@ const updateEstoque = async (id: string, novaQuantidade: number): Promise<void> 
   await update(id, { ...produto, quantidadeEstoque: novaQuantidade });
 };
 
+// ✅ Novo método para deletar produto
+const deleteProduto = async (id: string): Promise<void> => {
+  const docRef = doc(db, COLLECTION_NAME, id);
+  await deleteDoc(docRef);
+};
+
 export default {
   findAll,
   findById,
   save,
   update,
   updateEstoque,
+  delete: deleteProduto, // <-- Aqui você mapeia "delete" para o método correto
 };
