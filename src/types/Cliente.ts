@@ -20,17 +20,6 @@ export interface Endereco {
   cep: string;           // Código postal
 }
 
-/**
- * Representa um cliente do sistema.
- * 
- * O campo `saldo` indica:
- * - valores negativos = débito do cliente
- * - valores positivos = crédito do cliente
- * - valor 0 = sem saldo
- * 
- * O campo `saldo` agora é obrigatório para evitar verificações de undefined em tempo de execução.
- * Se estiver lidando com dados antigos, inicialize como 0 ao carregar do banco.
- */
 export interface Cliente {
   id: string;                   // Identificador único no banco
   nome: string;                 // Nome completo do cliente

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import Swal from 'sweetalert2';
-import { FiLogOut, FiCalendar, FiClock, FiHome } from 'react-icons/fi';
+import { FiLogOut, FiHome } from 'react-icons/fi';
 
 interface PublicSidebarProps {
   isOpen: boolean;
@@ -68,14 +68,6 @@ const PublicSidebar: React.FC<PublicSidebarProps> = ({ isOpen }) => {
         <Link to="/dashboard-cliente-publico" style={linkStyle('/dashboard-cliente-publico')}>
           <FiHome /> Dashboard
         </Link>
-
-        {/* <Link to="/meus-agendamentos" style={linkStyle('/meus-agendamentos')}>
-          <FiClock /> Meus Agendamentos
-        </Link>
-
-        <Link to="/meus-servicos" style={linkStyle('/meus-servicos')}>
-          <FiCalendar /> Histórico de Serviços
-        </Link> */}
 
         <button
           onClick={handleLogout}

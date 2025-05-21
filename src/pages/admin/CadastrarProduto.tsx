@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { colorAzul, colorBranco } from '../../values/colors';
+import { colorAzul } from '../../values/colors';
 import ProdutoRepository from '../../repositories/ProdutoRepository';
 import Swal from 'sweetalert2';
 
@@ -209,65 +209,7 @@ const CadastrarProduto = () => {
             />
           </div>
 
-          {/* Contatos */}
-          {/* <div className="mt-3">
-            <label>Contatos:</label>
-            {contatos.map((contato, index) => (
-              <div key={index} className="mt-2">
-                <div className="d-flex gap-2">
-                  <select
-                    value={contato.tipo}
-                    onChange={(e) => handleTipoChange(index, e.target.value)}
-                    className="form-control"
-                  >
-                    <option value="">Tipo</option>
-                    <option value="Telefone">Telefone</option>
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="E-mail">E-mail</option>
-                  </select>
-                  <input
-                    type="text"
-                    placeholder="ex: (xx) xxxxx-xxxx ou email@dominio.com"
-                    value={contato.valor}
-                    onChange={(e) => handleContatoChange(index, e.target.value)}
-                    className={`form-control ${contato.erro ? 'is-invalid' : ''}`}
-                  />
-                  {contatos.length > 1 && (
-                    <button type="button" onClick={() => handleRemoveContato(index)} className="btn btn-danger">
-                      Remover
-                    </button>
-                  )}
-                </div>
-                {contato.erro && (
-                  <small className="text-danger">{contato.erro}</small>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={handleAddContato}
-              className="btn btn-sm mt-2"
-              style={{ backgroundColor: colorAzul, color: colorBranco }}
-            >
-              Adicionar Contato
-            </button>
-          </div> */}
-
-          {/* Endereço */}
-          {/* <div className="mt-4">
-            <label>Endereço:</label>
-            {['rua', 'numero', 'bairro', 'cidade', 'estado', 'cep'].map((campo) => (
-              <input
-                key={campo}
-                type="text"
-                placeholder={campo[0].toUpperCase() + campo.slice(1)}
-                value={endereco[campo as keyof typeof endereco]}
-                onChange={(e) => setEndereco({ ...endereco, [campo]: e.target.value })}
-                className="form-control mt-2"
-                required
-              />
-            ))}
-          </div> */}
+          
 
           {/* Botões */}
           <div className="mt-4 d-flex gap-2">
