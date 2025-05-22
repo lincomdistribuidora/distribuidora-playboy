@@ -28,6 +28,9 @@ const CadastrarVenda = () => {
   const [pagamentoValor, setPagamentoValor] = useState<number>(0);
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
 
+  const saldoClienteExibir = Number(clienteSelecionado?.saldo) || 0;
+
+
   const [venda, setVenda] = useState<Venda>({
     id: '',
     tipo: '',
@@ -144,6 +147,9 @@ const CadastrarVenda = () => {
     const totalVenda = parseFloat(venda.valor);
     const totalPago = venda.pagamentoRecebido || 0;
 
+    // 🟡 Aqui você calcula o saldo final do cliente
+    const saldoFinalCliente = (clienteSelecionado?.saldo || 0) - saldoRestante;
+
     if (totalVenda > LIMITE_TOTAL_VENDA) {
       Swal.fire({
         icon: 'error',
@@ -152,87 +158,124 @@ const CadastrarVenda = () => {
         confirmButtonColor: colorAzul,
       });
       return;
-    }
+    } else {
+      // 🟠 Aqui você verifica se o saldo ficará negativo
+      if (saldoFinalCliente < 0) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'Saldo Insuficiente',
+          html: `
+        <p>O saldo do cliente ficará negativo após esta venda.</p>
+        <p><strong>Nome:</strong> ${clienteSelecionado?.nome}</p>
+        <p><strong>Saldo Atual:</strong> R$ ${clienteSelecionado?.saldo?.toFixed(2)}</p>
+        <p><strong>Saldo Após Venda:</strong> R$ ${saldoFinalCliente.toFixed(2)}</p>
+        <p>Deseja continuar mesmo assim?</p>
+      `,
+          showCancelButton: true,
+          confirmButtonText: 'Sim, continuar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: colorAzul,
+          cancelButtonColor: '#d33',
+        });
 
-    try {
-      const status = totalPago >= totalVenda ? 'Concluída' : 'Pendente';
-      const novaVenda: Venda = {
-        ...venda,
-        criadoEm: venda.criadoEm || new Date().toISOString(),
-        status,
-      };
-
-      const cliente = clientes.find(c => c.id === venda.cliente.id);
-      if (!cliente) throw new Error('Cliente não encontrado');
-
-      const valorAntigo = id ? parseFloat(venda.valor) : 0;
-      const pagoAntigo = id ? venda.pagamentoRecebido : 0;
-
-      let ajusteSaldo = 0;
-
-      if (id) {
-        const vendaAntiga = await vendaRepository.findById(id);
-        if (vendaAntiga) {
-          const saldoAntigo = vendaAntiga.pagamentoRecebido - parseFloat(vendaAntiga.valor);
-          ajusteSaldo -= saldoAntigo;
+        if (!result.isConfirmed) {
+          // Se o usuário cancelar, para a execução
+          return;
         }
       }
 
-      let saldoUsado = 0;
-      let saldoNovo = totalPago - totalVenda;
+      // ✅ Aqui continua o código normal para salvar a venda
+      try {
+        const status = totalPago >= totalVenda ? 'Concluída' : 'Pendente';
+        const novaVenda: Venda = {
+          ...venda,
+          criadoEm: venda.criadoEm || new Date().toISOString(),
+          status,
+        };
 
-      if (totalPago < totalVenda && cliente.saldo > 0) {
-        const faltante = totalVenda - totalPago;
-        saldoUsado = Math.min(cliente.saldo, faltante);
+        const cliente = clientes.find(c => c.id === venda.cliente.id);
+        if (!cliente) throw new Error('Cliente não encontrado');
 
-        const result = await Swal.fire({
-          icon: 'question',
-          title: 'Usar saldo do cliente?',
-          html: `
-            <p>Venda: R$ ${totalVenda.toFixed(2)}</p>
-            <p>Total pago: R$ ${totalPago.toFixed(2)}</p>
-            <p>Saldo atual do cliente: R$ ${cliente.saldo.toFixed(2)}</p>
-            <p>Usar R$ ${saldoUsado.toFixed(2)} de saldo para completar?</p>
-          `,
-          showCancelButton: true,
-          confirmButtonText: 'Sim, usar saldo',
-          cancelButtonText: 'Não',
+        // 1. Buscar a venda antiga para comparar valores e pagamentos
+        let saldoAnterior = 0;
+        if (id) {
+          const vendaAntiga = await vendaRepository.findById(id);
+          if (vendaAntiga) {
+            // saldoAnterior = pagamentoRecebido - valor (quanto o cliente "pagou a mais" ou "deu de saldo" antes)
+            saldoAnterior = vendaAntiga.pagamentoRecebido - parseFloat(vendaAntiga.valor);
+          }
+        }
+
+        // 2. Calcular o saldo novo da venda atual
+        let saldoAtual = totalPago - totalVenda;
+
+        // 3. Ajustar o saldo do cliente subtraindo o saldo anterior e somando o saldo atual
+        // Exemplo: se saldoAnterior foi +50 e saldoAtual é -20, o saldo do cliente deve diminuir 70 (50 - (-20))
+        cliente.saldo = (cliente.saldo || 0) - saldoAnterior + saldoAtual;
+
+        // 4. Perguntar se quer usar saldo para completar o pagamento, caso o totalPago < totalVenda e saldo do cliente > 0
+        if (totalPago < totalVenda && cliente.saldo > 0) {
+          const faltante = totalVenda - totalPago;
+          const saldoUsado = Math.min(cliente.saldo, faltante);
+
+          const result = await Swal.fire({
+            icon: 'question',
+            title: 'Usar saldo do cliente?',
+            html: `
+        <p>Venda: R$ ${totalVenda.toFixed(2)}</p>
+        <p>Total pago: R$ ${totalPago.toFixed(2)}</p>
+        <p>Saldo atual do cliente: R$ ${cliente.saldo.toFixed(2)}</p>
+        <p>Usar R$ ${saldoUsado.toFixed(2)} de saldo para completar?</p>
+      `,
+            showCancelButton: true,
+            confirmButtonText: 'Sim, usar saldo',
+            cancelButtonText: 'Não',
+            confirmButtonColor: colorAzul,
+          });
+
+          if (result.isConfirmed) {
+            // Usar o saldo do cliente para abater o valor faltante
+            cliente.saldo -= saldoUsado;
+            saldoAtual -= saldoUsado;
+
+            // Atualizar a venda para refletir o pagamento total com saldo usado
+            novaVenda.pagamentoRecebido = totalPago + saldoUsado;
+            novaVenda.status = novaVenda.pagamentoRecebido >= totalVenda ? 'Concluída' : 'Pendente';
+          }
+        }
+
+        // 5. Atualizar cliente no repositório
+        await clienteRepository.update(cliente.id, cliente);
+        setClienteSelecionado(cliente);
+
+        // 6. Atualizar ou salvar a venda
+        if (id) {
+          await vendaRepository.update(id, novaVenda);
+        } else {
+          await vendaRepository.save(novaVenda);
+        }
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Venda salva com sucesso!',
           confirmButtonColor: colorAzul,
         });
 
-        if (result.isConfirmed) {
-          saldoNovo = totalPago + saldoUsado - totalVenda;
-        } else {
-          saldoUsado = 0;
-        }
+        navigate('/vendas');
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao salvar venda',
+          confirmButtonColor: '#d33',
+        });
       }
-
-      ajusteSaldo += saldoNovo - saldoUsado;
-      cliente.saldo = (cliente.saldo || 0) + ajusteSaldo;
-
-      await clienteRepository.update(cliente.id, cliente);
-
-      if (id) {
-        await vendaRepository.update(id, novaVenda);
-      } else {
-        await vendaRepository.save(novaVenda);
-      }
-
-      await Swal.fire({
-        icon: 'success',
-        title: 'Venda salva com sucesso!',
-        confirmButtonColor: colorAzul,
-      });
-
-      navigate('/vendas');
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Erro ao salvar venda',
-        confirmButtonColor: '#d33',
-      });
     }
+
+
+
+
+
   };
 
   return (
@@ -258,18 +301,26 @@ const CadastrarVenda = () => {
               placeholder="Selecione o cliente"
               required
             />
-            {clienteSelecionado && clienteSelecionado.saldo !== 0 && (
+            {clienteSelecionado && saldoClienteExibir !== 0 && (
               <p className="mt-2">
-                {clienteSelecionado.saldo < 0
-                  ? `Cliente possui débito de R$ ${Math.abs(clienteSelecionado.saldo).toFixed(2)}`
-                  : `Cliente possui crédito de R$ ${clienteSelecionado.saldo.toFixed(2)}`}
+                {saldoClienteExibir < 0
+                  ? `Cliente possui débito de R$ ${Math.abs(saldoClienteExibir).toFixed(2)}`
+                  : `Cliente possui crédito de R$ ${saldoClienteExibir.toFixed(2)}`}
               </p>
             )}
+
           </div>
 
           {/* Produtos */}
           <div className="mt-4">
             <label>Produtos:</label>
+            <button
+              type="button"
+              className="btn btn-primary ms-2"
+              onClick={() => {
+                // ir para adicionar produto e quando voltar tem que vim preenchido o campo para continuar com a venda.
+              }}
+            >Adicionar</button>
             <Select
               options={produtosDisponiveis.map(p => ({ value: p.id, label: `${p.nome} - R$ ${p.valorVenda}` }))}
               onChange={(opt) => {
@@ -280,6 +331,8 @@ const CadastrarVenda = () => {
               className="mt-2"
               isSearchable
             />
+
+
 
             <ul className="list-group mt-3">
               {venda.produtos.map((p, index) => (
@@ -331,6 +384,7 @@ const CadastrarVenda = () => {
                         className="form-control form-control-sm me-2"
                         style={{ width: 70 }}
                       />
+
 
                       <button
                         type="button"
@@ -425,7 +479,7 @@ const CadastrarVenda = () => {
             <p><strong>Total da Venda:</strong> R$ {parseFloat(venda.valor).toFixed(2)}</p>
             <p><strong>Total Pago:</strong> R$ {venda.pagamentoRecebido.toFixed(2)}</p>
             <p><strong>Total a pagar:</strong> R$ {saldoRestante.toFixed(2)}</p>
-            <p><strong>Saldo do Cliente Após Venda:</strong> R$ {saldoFinalCliente.toFixed(2)}</p>
+            {/* <p><strong>Saldo do Cliente Após Venda:</strong> R$ {saldoFinalCliente.toFixed(2)}</p> */}
           </div>
 
 

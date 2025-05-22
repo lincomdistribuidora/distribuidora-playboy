@@ -1,153 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import ProdutoRepository from '../../repositories/ProdutoRepository';
 import Swal from 'sweetalert2';
 import { NumericFormat } from 'react-number-format';
 
-// interface Contato {
-//   tipo: string;
-//   valor: string;
-//   erro: string;
-// }
-
 const CadastrarProduto = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
+
+  const fromVenda = location.state?.fromVenda;
 
   const [nome, setNome] = useState('');
   const [valorVenda, setValorVenda] = useState<number>(0);
   const [quantidadeEstoque, setQuantidadeEstoque] = useState('');
 
-  // const [contatos, setContatos] = useState<Contato[]>([{ tipo: '', valor: '', erro: '' }]);
-  // const [endereco, setEndereco] = useState({
-  //   rua: '',
-  //   numero: '',
-  //   bairro: '',
-  //   cidade: '',
-  //   estado: '',
-  //   cep: '',
-  // });
-
-  // Máscara para telefone/whatsapp
-  // const applyMask = (tipo: string, value: string): string => {
-  //   value = value.replace(/\D/g, '');
-  //   if (tipo === 'Telefone' || tipo === 'WhatsApp') {
-  //     if (value.length <= 2) return value.replace(/^(\d{0,2})/, '($1');
-  //     else if (value.length <= 6) return value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-  //     else return value.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-  //   }
-  //   return value;
-  // };
-
-  // Validação para tipos de contato
-  // s
-
-  // Buscar dados se for edição
   useEffect(() => {
     if (id) {
       ProdutoRepository.findById(id)
         .then((produto) => {
           if (produto) {
             setNome(produto.nome || '');
-            setValorVenda('' + produto.valorVenda || '');
-            // setValorVenda('R$ ' + produto.valorVenda || '');
+            setValorVenda(produto.valorVenda || 0);
             setQuantidadeEstoque(produto.quantidadeEstoque || '');
-
-            // const contatosCarregados = (produto.contatos || []).map((c: any) => ({
-            //   tipo: c.tipo || '',
-            //   valor: c.valor || '',
-            //   erro: '',
-            // }));
-
-
-            // setContatos(contatosCarregados.length ? contatosCarregados : [{ tipo: '', valor: '', erro: '' }]);
-            // setEndereco(produto.endereco || {
-            //   rua: '', numero: '', bairro: '', cidade: '', estado: '', cep: ''
-            // });
           }
         })
         .catch(console.error);
     }
   }, [id]);
 
-  // Adicionar novo contato
-  // const handleAddContato = () => {
-  //   setContatos([...contatos, { tipo: '', valor: '', erro: '' }]);
-  // };
-
-  // Remover contato
-  // const handleRemoveContato = (index: number) => {
-  //   const updated = [...contatos];
-  //   updated.splice(index, 1);
-  //   setContatos(updated);
-  // };
-
-  // Atualizar tipo do contato e limpar valor
-  // const handleTipoChange = (index: number, value: string) => {
-  //   const updated = [...contatos];
-  //   updated[index].tipo = value;
-  //   updated[index].valor = '';
-  //   updated[index].erro = 'Campo obrigatório';
-  //   setContatos(updated);
-  // };
-
-  // Atualizar valor e validar automaticamente
-  // const handleContatoChange = (index: number, value: string) => {
-  //   const updated = [...contatos];
-  //   const tipo = updated[index].tipo;
-
-  //   const valorFormatado = tipo === 'Telefone' || tipo === 'WhatsApp'
-  //     ? applyMask(tipo, value)
-  //     : value;
-
-  //   updated[index].valor = valorFormatado;
-  //   updated[index].erro = validateContato(tipo, valorFormatado);
-  //   setContatos(updated);
-  // };
-
-  // Envio do formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Remove contatos totalmente vazios
-    // const contatosPreenchidos = contatos.filter(c => c.tipo || c.valor);
-
-    // Valida apenas os preenchidos
-    // const contatosValidados = contatosPreenchidos.map((c) => ({
-    //   ...c,
-    //   erro: validateContato(c.tipo, c.valor),
-    // }));
-
-    // const contatosValidos = contatosValidados.filter(c => !c.erro && c.tipo && c.valor);
-
-    // Verifica se ao menos um contato válido está presente
-    // if (contatosValidos.length === 0) {
-    //   await Swal.fire({
-    //     icon: 'warning',
-    //     title: 'É necessário pelo menos um contato válido!',
-    //     confirmButtonColor: '#d33',
-    //   });
-    //   setContatos(contatosValidados);
-    //   return;
-    // }
-
-    // setContatos(contatosValidados);
-
     const produto = {
       nome,
-      valorVenda: valorVenda,
-      quantidadeEstoque: quantidadeEstoque,
-      // contatos: contatosValidos.map(({ tipo, valor }) => ({ tipo, valor })),
-      // endereco,
+      valorVenda,
+      quantidadeEstoque,
       criadoEm: new Date().toISOString(),
     };
 
     try {
+      let novoProduto;
       if (id) {
         await ProdutoRepository.update(id, produto);
+        novoProduto = { ...produto, id };  // Garante que o ID seja passado ao voltar
       } else {
-        await ProdutoRepository.save(produto);
+        const produtoSalvo = await ProdutoRepository.save(produto);
+        novoProduto = produtoSalvo;  // Se o save já retorna o produto com ID
       }
 
       await Swal.fire({
@@ -156,7 +56,12 @@ const CadastrarProduto = () => {
         confirmButtonColor: colorAzul,
       });
 
-      navigate('/produtos', { replace: true });
+      if (fromVenda) {
+        // Volta para a tela de venda enviando o produto criado
+        navigate('/cadastrar-venda', { state: { produtoAdicionado: novoProduto } });
+      } else {
+        navigate('/produtos', { replace: true });
+      }
     } catch (error) {
       console.error(error);
       await Swal.fire({
@@ -213,8 +118,6 @@ const CadastrarProduto = () => {
             />
           </div>
 
-
-
           {/* Botões */}
           <div className="mt-4 d-flex gap-2">
             <button type="submit" className="btn btn-success">
@@ -222,7 +125,7 @@ const CadastrarProduto = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/produtos')}
+              onClick={() => navigate(fromVenda ? '/cadastrar-venda' : '/produtos')}
               className="btn btn-secondary"
             >
               Cancelar
