@@ -6,11 +6,12 @@
 
 ### TELAS
 - Login
-- Cadastrar Cliente?
 - Produto
   - Cadastrar/Alterar (Verificar se vai querer colocar marca, categoria e etc...)
     - Id
     - Nome
+    - Valor Venda
+    - Foto do produto
   - Entrada (Verificar se vai querer colocar fornecedor e etc...)
     - Quantidade
     - Valor Pago

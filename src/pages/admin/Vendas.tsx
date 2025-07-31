@@ -1,12 +1,15 @@
+// src/pages/admin/Vendas.tsx
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import VendaRepository from '../../repositories/VendaRepository';
 import Swal from 'sweetalert2';
+import DatePicker from 'react-datepicker';
+import { format, isSameDay } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import 'react-datepicker/dist/react-datepicker.css';
 
-// import { Venda } from '../../types/Venda';
-
-// Tipagem da Venda
 interface Venda {
   id: string;
   tipo: string;
@@ -16,26 +19,32 @@ interface Venda {
     [key: string]: any;
   };
   criadoEm: string;
+  status?: string;
 }
 
 const Vendas = () => {
   const navigate = useNavigate();
   const [vendas, setVendas] = useState<Venda[]>([]);
-  const [filtro, setFiltro] = useState('');
+  const [filtroTexto, setFiltroTexto] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('pendente');
+  const [filtroData, setFiltroData] = useState<Date | null>(new Date());
   const [paginaAtual, setPaginaAtual] = useState(1);
   const vendasPorPagina = 10;
 
-  // Busca todas as vendas no repositório
+  // Carrega vendas do Firebase
   const fetchVendas = async () => {
     try {
       const lista = await VendaRepository.findAll();
-      setVendas(lista.map(s => ({
-        id: s.id,
-        tipo: s.tipo || '',
-        valor: s.valor || '',
-        cliente: s.cliente || { nome: 'Cliente não informado' },
-        criadoEm: s.criadoEm || '',
-      })));
+      setVendas(
+        lista.map((s) => ({
+          id: s.id,
+          tipo: s.tipo || '',
+          valor: s.valor || '',
+          cliente: s.cliente || { nome: 'Cliente não informado' },
+          criadoEm: s.criadoEm || '',
+          status: s.status || 'Pendente',
+        }))
+      );
     } catch (error) {
       console.error('Erro ao buscar vendas:', error);
     }
@@ -45,12 +54,7 @@ const Vendas = () => {
     fetchVendas();
   }, []);
 
-  // Navegação e ações
-  const handleEditar = (id: string) => {
-    console.log("Editando venda, ID recebido:", id);
-    navigate(`../cadastrar-venda/${id}`);
-  };
-
+  const handleEditar = (id: string) => navigate(`../cadastrar-venda/${id}`);
   const handleCadastrar = () => navigate('/cadastrar-venda');
   const handleDashboard = () => navigate('/dashboard');
 
@@ -68,7 +72,6 @@ const Vendas = () => {
 
     if (result.isConfirmed) {
       try {
-        console.log('Excluindo venda ID:', id);
         await VendaRepository.remove(id);
         await fetchVendas();
         Swal.fire('Excluído!', 'A venda foi removida com sucesso.', 'success');
@@ -79,11 +82,19 @@ const Vendas = () => {
     }
   };
 
-  // Filtragem e Paginação
+  // Aplica os filtros de texto, status e data
   const vendasFiltradas = vendas
     .filter((venda) =>
-      JSON.stringify(venda).toLowerCase().includes(filtro.toLowerCase())
+      JSON.stringify(venda).toLowerCase().includes(filtroTexto.toLowerCase())
     )
+    .filter((venda) => {
+      if (filtroStatus === 'todos') return true;
+      return venda.status?.toLowerCase() === filtroStatus;
+    })
+    .filter((venda) => {
+      if (!filtroData) return true;
+      return isSameDay(new Date(venda.criadoEm), filtroData);
+    })
     .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
 
   const totalPaginas = Math.ceil(vendasFiltradas.length / vendasPorPagina);
@@ -98,7 +109,7 @@ const Vendas = () => {
 
   return (
     <div className="container mt-4">
-      {/* Botões de ação */}
+      {/* Botões principais */}
       <div style={styles.botoesContainer}>
         <button onClick={handleDashboard} className="btn btn-outline-secondary w-100">
           Voltar ao Dashboard
@@ -108,20 +119,46 @@ const Vendas = () => {
         </button>
       </div>
 
-      {/* Campo de busca */}
-      <input
-        type="text"
-        className="form-control mb-4"
-        placeholder="Buscar venda..."
-        value={filtro}
-        onChange={(e) => {
-          setFiltro(e.target.value);
-          setPaginaAtual(1);
-        }}
-        style={styles.inputBusca}
-      />
+      {/* Filtros */}
+      <div className="mb-3" style={{ paddingInline: '8px' }}>
+        <label>Pesquisar por status:</label>
+        <select
+          className="form-control mb-2"
+          value={filtroStatus}
+          onChange={(e) => setFiltroStatus(e.target.value)}
+        >
+          <option value="todos">Todos</option>
+          <option value="pendente">Pendente</option>
+          <option value="concluída">Concluída</option>
+        </select>
 
-      {/* Lista de vendas ou mensagem de vazio */}
+        <label>Filtrar por data:</label>
+        <DatePicker
+          selected={filtroData}
+          onChange={(date) => {
+            setFiltroData(date);
+            setPaginaAtual(1);
+          }}
+          dateFormat="dd/MM/yyyy"
+          locale={ptBR}
+          isClearable
+          className="form-control mb-2"
+          placeholderText="Selecione uma data"
+        />
+
+        <input
+          type="text"
+          className="form-control mb-3"
+          placeholder="Buscar por nome, tipo, etc..."
+          value={filtroTexto}
+          onChange={(e) => {
+            setFiltroTexto(e.target.value);
+            setPaginaAtual(1);
+          }}
+        />
+      </div>
+
+      {/* Lista de vendas */}
       {vendasFiltradas.length === 0 ? (
         <p className="text-center">Nenhuma venda encontrada.</p>
       ) : (
@@ -133,10 +170,20 @@ const Vendas = () => {
                   {venda.cliente?.nome}
                 </strong>
                 <small style={{ fontSize: '14px' }}>
-                  {venda.tipo} | R$ {Number(venda.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {venda.tipo} | R$ {Number(venda.valor).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                  })}
                 </small>
                 <small style={{ fontSize: '12px', color: '#888' }}>
                   Criado em: {new Date(venda.criadoEm).toLocaleDateString('pt-BR')}
+                </small>
+                <small
+                  style={{
+                    fontSize: '13px',
+                    color: venda.status === 'Concluída' ? 'green' : 'red',
+                  }}
+                >
+                  Situação: {venda.status}
                 </small>
               </div>
 
@@ -144,7 +191,10 @@ const Vendas = () => {
                 <button onClick={() => handleEditar(venda.id)} className="btn btn-primary btn-sm">
                   Editar
                 </button>
-                <button onClick={() => handleExcluir(venda.id)} className="btn btn-danger btn-sm">
+                <button
+                  onClick={() => handleExcluir(venda.id)}
+                  className="btn btn-danger btn-sm"
+                >
                   Excluir
                 </button>
               </div>
@@ -187,7 +237,7 @@ const Vendas = () => {
   );
 };
 
-// Estilização inline
+// Estilos inline
 const styles = {
   botoesContainer: {
     display: 'flex',
@@ -195,11 +245,6 @@ const styles = {
     gap: '10px',
     marginBottom: '20px',
     paddingInline: '8px',
-  },
-  inputBusca: {
-    padding: '10px',
-    fontSize: '16px',
-    margin: '10px',
   },
   card: {
     backgroundColor: '#fff',
