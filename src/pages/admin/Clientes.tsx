@@ -7,7 +7,6 @@ import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Users } from 'lucide-react';
 
-// Tipagens auxiliares
 interface Contato {
   tipo: string;
   valor: string;
@@ -17,6 +16,7 @@ interface Cliente {
   id: string;
   nome: string;
   contatos: Contato[];
+  saldo?: number;
 }
 
 const Clientes = () => {
@@ -24,10 +24,10 @@ const Clientes = () => {
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [filtro, setFiltro] = useState('');
+  const [filtroSaldo, setFiltroSaldo] = useState('todos'); // novo filtro
   const [paginaAtual, setPaginaAtual] = useState(1);
   const clientesPorPagina = 10;
 
-  // Buscar todos os clientes ao carregar a tela
   useEffect(() => {
     const fetchClientes = async () => {
       const lista = await ClienteRepository.findAll();
@@ -36,12 +36,10 @@ const Clientes = () => {
     fetchClientes();
   }, []);
 
-  // Ações de navegação
   const handleEditar = (id: string) => navigate(`/cadastrar-cliente/${id}`);
   const handleCadastrar = () => navigate('/cadastrar-cliente');
   const handleDashboard = () => navigate('/dashboard');
 
-  // Excluir cliente com confirmação
   const handleExcluir = async (id: string) => {
     const result = await Swal.fire({
       title: 'Tem certeza?',
@@ -61,17 +59,23 @@ const Clientes = () => {
     }
   };
 
-  // Filtrar e ordenar clientes por nome (A-Z)
   const clientesFiltrados = clientes
-    .filter(cliente =>
-      JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase())
-    )
+    .filter((cliente) => {
+      const saldo = Number(cliente.saldo) || 0;
+
+      // Aplica filtro de crédito, se necessário
+      if (filtroSaldo === 'credito' && saldo >= 0) return false;
+
+      return JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase());
+    })
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
-  // Paginação
   const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
   const indiceInicial = (paginaAtual - 1) * clientesPorPagina;
-  const clientesPaginados = clientesFiltrados.slice(indiceInicial, indiceInicial + clientesPorPagina);
+  const clientesPaginados = clientesFiltrados.slice(
+    indiceInicial,
+    indiceInicial + clientesPorPagina
+  );
 
   const mudarPagina = (novaPagina: number) => {
     if (novaPagina >= 1 && novaPagina <= totalPaginas) {
@@ -91,58 +95,101 @@ const Clientes = () => {
         </button>
       </div>
 
-      {/* Campo de busca */}
-      <input
-        type="text"
-        className="form-control mb-4"
-        placeholder="Buscar cliente..."
-        value={filtro}
-        onChange={(e) => {
-          setFiltro(e.target.value);
-          setPaginaAtual(1); // Reiniciar para página 1 ao filtrar
-        }}
-        style={styles.inputBusca}
-      />
+      {/* Campo de busca + filtro de saldo */}
+      <div className="d-flex align-items-center gap-2 mb-4 px-2 flex-wrap">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Buscar cliente..."
+          value={filtro}
+          onChange={(e) => {
+            setFiltro(e.target.value);
+            setPaginaAtual(1);
+          }}
+          style={{ flex: 1, minWidth: '200px' }}
+        />
 
-      {/* Lista de clientes ou mensagem de vazio */}
+        <select
+          className="form-select"
+          value={filtroSaldo}
+          onChange={(e) => {
+            setFiltroSaldo(e.target.value);
+            setPaginaAtual(1);
+          }}
+          style={{ maxWidth: '200px' }}
+        >
+          <option value="todos">Todos</option>
+          <option value="credito">Com saldo (Crédito)</option>
+        </select>
+      </div>
+
+      {/* Lista de clientes */}
       {clientesFiltrados.length === 0 ? (
         <p className="text-center">Nenhum cliente encontrado.</p>
       ) : (
-        clientesPaginados.map((cliente) => (
-          <div key={cliente.id} style={styles.card}>
-            <div style={styles.cardBody}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Users size={32} strokeWidth={2} color={colorAzul} />
-                <div>
-                  <strong style={{ fontSize: '18px' }}>{cliente.nome}</strong>
-                  <br />
-                  <small style={{ fontSize: '14px' }}>
-                    {cliente.contatos?.length
-                      ? cliente.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ')
-                      : 'Sem contato'}
-                  </small>
+        clientesPaginados.map((cliente) => {
+          const saldo = Number(cliente.saldo) || 0;
+          const saldoFormatado = saldo.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          });
+
+          const textoSaldo =
+            saldo < 0
+              ? `Crédito: ${saldoFormatado}`
+              : saldo > 0
+              ? `Débito: ${saldoFormatado}`
+              : 'Sem saldo pendente';
+
+          const corSaldo =
+            saldo < 0 ? '#d9534f' : saldo > 0 ? '#5cb85c' : '#6c757d';
+
+          return (
+            <div key={cliente.id} style={styles.card}>
+              <div style={styles.cardBody}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Users size={32} strokeWidth={2} color={colorAzul} />
+                  <div>
+                    <strong style={{ fontSize: '18px' }}>{cliente.nome}</strong>
+                    <br />
+                    <small style={{ fontSize: '14px' }}>
+                      {cliente.contatos?.length
+                        ? cliente.contatos.map(c => `${c.tipo}: ${c.valor}`).join(', ')
+                        : 'Sem contato'}
+                    </small>
+                    <br />
+                    <small
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        color: corSaldo,
+                      }}
+                    >
+                      {textoSaldo}
+                    </small>
+                  </div>
+                </div>
+
+                <div style={styles.botoesCard}>
+                  <button
+                    onClick={() => handleEditar(cliente.id)}
+                    className="btn btn-primary btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Edit2 size={16} /> Editar
+                  </button>
+                  <button
+                    onClick={() => handleExcluir(cliente.id)}
+                    className="btn btn-danger btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Trash2 size={16} /> Excluir
+                  </button>
                 </div>
               </div>
-
-              <div style={styles.botoesCard}>
-                <button
-                  onClick={() => handleEditar(cliente.id)}
-                  className="btn btn-primary btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <Edit2 size={16} /> Editar
-                </button>
-                <button
-                  onClick={() => handleExcluir(cliente.id)}
-                  className="btn btn-danger btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <Trash2 size={16} /> Excluir
-                </button>
-              </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
 
       {/* Paginação */}
@@ -179,7 +226,6 @@ const Clientes = () => {
   );
 };
 
-// Estilização inline
 const styles = {
   titulo: {
     color: colorAzul,

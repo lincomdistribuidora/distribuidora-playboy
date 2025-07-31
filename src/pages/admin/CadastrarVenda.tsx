@@ -314,13 +314,13 @@ const CadastrarVenda = () => {
           {/* Produtos */}
           <div className="mt-4">
             <label>Produtos:</label>
-            {/* <button
+            <button
               type="button"
               className="btn btn-primary ms-2"
               onClick={() => {
                 // ir para adicionar produto e quando voltar tem que vim preenchido o campo para continuar com a venda.
               }}
-            >Adicionar</button> */}
+            >Adicionar</button>
             <Select
               options={produtosDisponiveis.map(p => ({ value: p.id, label: `${p.nome} - R$ ${p.valorVenda}` }))}
               onChange={(opt) => {
