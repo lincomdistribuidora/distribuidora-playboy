@@ -62,12 +62,17 @@ const Clientes = () => {
   const clientesFiltrados = clientes
     .filter((cliente) => {
       const saldo = Number(cliente.saldo) || 0;
-
-      // Aplica filtro de crédito, se necessário
-      if (filtroSaldo === 'credito' && saldo >= 0) return false;
-
-      return JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase());
+      if (filtroSaldo === 'credito') {
+        return saldo < 0;
+      }
+      if (filtroSaldo === 'debito') {
+        return saldo > 0;
+      }
+      return true;
     })
+    .filter((cliente) =>
+      JSON.stringify(cliente).toLowerCase().includes(filtro.toLowerCase())
+    )
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
@@ -120,6 +125,7 @@ const Clientes = () => {
         >
           <option value="todos">Todos</option>
           <option value="credito">Com saldo (Crédito)</option>
+          <option value="debito">Com saldo (Débito)</option>
         </select>
       </div>
 
@@ -138,8 +144,8 @@ const Clientes = () => {
             saldo < 0
               ? `Crédito: ${saldoFormatado}`
               : saldo > 0
-              ? `Débito: ${saldoFormatado}`
-              : 'Sem saldo pendente';
+                ? `Débito: ${saldoFormatado}`
+                : 'Sem saldo pendente';
 
           const corSaldo =
             saldo < 0 ? '#d9534f' : saldo > 0 ? '#5cb85c' : '#6c757d';

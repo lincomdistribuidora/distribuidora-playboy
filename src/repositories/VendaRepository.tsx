@@ -13,9 +13,9 @@ import { Venda } from '../types/Venda';
 import { Produto } from '../types/Produto';
 import { Cliente } from '../types/Cliente';
 
-const VENDAS_COLLECTION     = 'vendas';
-const PRODUTOS_COLLECTION   = 'produtos';
-const CLIENTES_COLLECTION   = 'clientes';
+const VENDAS_COLLECTION = 'vendas';
+const PRODUTOS_COLLECTION = 'produtos';
+const CLIENTES_COLLECTION = 'clientes';
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
@@ -24,13 +24,13 @@ const CLIENTES_COLLECTION   = 'clientes';
 /** Debita estoque dos produtos vendidos */
 const debitarEstoque = async (venda: Omit<Venda, 'id'>): Promise<void> => {
   for (const item of venda.produtos || []) {
-    const prodRef  = doc(db, PRODUTOS_COLLECTION, item.produtoId);
+    const prodRef = doc(db, PRODUTOS_COLLECTION, item.produtoId);
     const prodSnap = await getDoc(prodRef);
     if (!prodSnap.exists()) continue;
 
-    const produto        = prodSnap.data() as Produto;
-    const estoqueAtual   = Number(produto.quantidadeEstoque || 0);
-    const novoEstoque    = Math.max(estoqueAtual - item.quantidade, 0);
+    const produto = prodSnap.data() as Produto;
+    const estoqueAtual = Number(produto.quantidadeEstoque || 0);
+    const novoEstoque = Math.max(estoqueAtual - item.quantidade, 0);
 
     await updateDoc(prodRef, { quantidadeEstoque: String(novoEstoque) });
   }
@@ -39,13 +39,13 @@ const debitarEstoque = async (venda: Omit<Venda, 'id'>): Promise<void> => {
 /** Reverte estoque dos produtos da venda antiga */
 const reporEstoque = async (vendaAntiga: Venda): Promise<void> => {
   for (const item of vendaAntiga.produtos || []) {
-    const prodRef  = doc(db, PRODUTOS_COLLECTION, item.produtoId);
+    const prodRef = doc(db, PRODUTOS_COLLECTION, item.produtoId);
     const prodSnap = await getDoc(prodRef);
     if (!prodSnap.exists()) continue;
 
-    const produto        = prodSnap.data() as Produto;
-    const estoqueAtual   = Number(produto.quantidadeEstoque || 0);
-    const novoEstoque    = estoqueAtual + item.quantidade;
+    const produto = prodSnap.data() as Produto;
+    const estoqueAtual = Number(produto.quantidadeEstoque || 0);
+    const novoEstoque = estoqueAtual + item.quantidade;
 
     await updateDoc(prodRef, { quantidadeEstoque: String(novoEstoque) });
   }
@@ -55,15 +55,22 @@ const reporEstoque = async (vendaAntiga: Venda): Promise<void> => {
 const debitarSaldoCliente = async (venda: Omit<Venda, 'id'>): Promise<void> => {
   if (!venda.clienteId) return;
 
-  const clienteRef  = doc(db, CLIENTES_COLLECTION, venda.clienteId);
+  const clienteRef = doc(db, CLIENTES_COLLECTION, venda.clienteId);
   const clienteSnap = await getDoc(clienteRef);
   if (!clienteSnap.exists()) return;
 
   const cliente = clienteSnap.data() as Cliente;
   const saldoAtual = Number(cliente.saldo || 0);
 
-  const totalPago = venda.pagamentos?.reduce((acc, pag) => acc + pag.valor, 0) || 0;
-  const valorRestante = venda.valorTotal - totalPago;
+  const totalPago = venda.pagamentos?.reduce((acc, pag) => acc + (pag.valor || 0), 0) || 0;
+  const valorVenda = parseFloat(venda.valor || '0');
+
+  if (isNaN(valorVenda)) {
+    console.warn('Venda com valor inválido para debitarSaldoCliente:', venda);
+    return;
+  }
+
+  const valorRestante = valorVenda - totalPago;
 
   // Só debita se há valor pendente
   if (valorRestante > 0) {
@@ -73,9 +80,8 @@ const debitarSaldoCliente = async (venda: Omit<Venda, 'id'>): Promise<void> => {
 };
 
 /** Reverte o saldo do cliente (ex: ao excluir ou editar uma venda) */
-/** Reverte o saldo do cliente (ex: ao excluir ou editar uma venda) */
 const reporSaldoCliente = async (venda: Venda): Promise<void> => {
-  const clienteId = venda.cliente?.id;
+  const clienteId = venda.cliente?.id || venda.clienteId;
   if (!clienteId) return;
 
   const clienteRef = doc(db, CLIENTES_COLLECTION, clienteId);
@@ -85,10 +91,16 @@ const reporSaldoCliente = async (venda: Venda): Promise<void> => {
   const cliente = clienteSnap.data() as Cliente;
   const saldoAtual = Number(cliente.saldo || 0);
 
-  const totalPago = venda.pagamentos?.reduce((acc, pag) => acc + pag.valor, 0) || 0;
-  const valorQueHaviaSidoDebitado = venda.valorTotal - totalPago;
+  const totalPago = venda.pagamentos?.reduce((acc, pag) => acc + (pag.valor || 0), 0) || 0;
+  const valorVenda = parseFloat(venda.valor || '0');
+
+  if (isNaN(valorVenda)) {
+    console.warn('Venda com valor inválido para reporSaldoCliente:', venda);
+    return;
+  }
 
   // Repõe o valor que havia sido debitado
+  const valorQueHaviaSidoDebitado = valorVenda - totalPago;
   const novoSaldo = saldoAtual + valorQueHaviaSidoDebitado;
   await updateDoc(clienteRef, { saldo: novoSaldo });
 };
@@ -138,10 +150,34 @@ const remove = async (id: string): Promise<void> => {
   if (vendaSnap.exists()) {
     const venda = vendaSnap.data() as Venda;
     await reporEstoque(venda);
-    await reporSaldoCliente(venda); // <-- chamada corrigida
+    await reporSaldoCliente(venda);
   }
 
   await deleteDoc(docRef);
+};
+
+const calcularSaldoFuturoCliente = async (venda: Omit<Venda, 'id'>): Promise<number | null> => {
+  if (!venda.cliente?.id && !venda.clienteId) return null;
+
+  const clienteId = venda.cliente?.id || venda.clienteId;
+
+  const clienteRef = doc(db, CLIENTES_COLLECTION, clienteId);
+  const clienteSnap = await getDoc(clienteRef);
+  if (!clienteSnap.exists()) return null;
+
+  const cliente = clienteSnap.data() as Cliente;
+  const saldoAtual = Number(cliente.saldo || 0);
+
+  const totalPago = venda.pagamentos?.reduce((acc, pag) => acc + (pag.valor || 0), 0) || 0;
+  const valorVenda = parseFloat(venda.valor || '0');
+
+  if (isNaN(valorVenda)) return null;
+
+  const valorRestante = valorVenda - totalPago;
+
+  const novoSaldo = saldoAtual + valorRestante;
+
+  return novoSaldo;
 };
 
 export default {
@@ -150,4 +186,5 @@ export default {
   save,
   update,
   remove,
+  calcularSaldoFuturoCliente,
 };

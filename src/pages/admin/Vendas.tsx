@@ -20,6 +20,7 @@ interface Venda {
   };
   criadoEm: string;
   status?: string;
+  pagamentoRecebido: number;  // Pagamentos realizados até o momento
 }
 
 const Vendas = () => {
@@ -43,6 +44,7 @@ const Vendas = () => {
           cliente: s.cliente || { nome: 'Cliente não informado' },
           criadoEm: s.criadoEm || '',
           status: s.status || 'Pendente',
+          pagamentoRecebido: s.pagamentoRecebido || 0,  // Adicionando o campo pagamentoRecebido
         }))
       );
     } catch (error) {
@@ -162,45 +164,60 @@ const Vendas = () => {
       {vendasFiltradas.length === 0 ? (
         <p className="text-center">Nenhuma venda encontrada.</p>
       ) : (
-        vendasPaginadas.map((venda, index) => (
-          <div key={venda.id || `venda-${index}`} style={styles.card}>
-            <div style={styles.cardBody}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <strong style={{ fontSize: '18px', color: colorAzul }}>
-                  {venda.cliente?.nome}
-                </strong>
-                <small style={{ fontSize: '14px' }}>
-                  {venda.tipo} | R$ {Number(venda.valor).toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                  })}
-                </small>
-                <small style={{ fontSize: '12px', color: '#888' }}>
-                  Criado em: {new Date(venda.criadoEm).toLocaleDateString('pt-BR')}
-                </small>
-                <small
-                  style={{
-                    fontSize: '13px',
-                    color: venda.status === 'Concluída' ? 'green' : 'red',
-                  }}
-                >
-                  Situação: {venda.status}
-                </small>
-              </div>
+        vendasPaginadas.map((venda, index) => {
+          // Calcular o valor pendente
+          const valorTotal = parseFloat(venda.valor) || 0; // Garantir que o valor total seja numérico
+          const valorPago = venda.pagamentoRecebido || 0;  // Garantir que pagamento recebido seja numérico
+          const valorPendente = valorTotal - valorPago;
 
-              <div style={styles.botoesCard}>
-                <button onClick={() => handleEditar(venda.id)} className="btn btn-primary btn-sm">
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleExcluir(venda.id)}
-                  className="btn btn-danger btn-sm"
-                >
-                  Excluir
-                </button>
+          return (
+            <div key={venda.id || `venda-${index}`} style={styles.card}>
+              <div style={styles.cardBody}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <strong style={{ fontSize: '18px', color: colorAzul }}>
+                    {venda.cliente?.nome}
+                  </strong>
+                  <small style={{ fontSize: '14px' }}>
+                    {venda.tipo} | R$ {Number(venda.valor).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                    })}
+                  </small>
+                  <small style={{ fontSize: '12px', color: '#888' }}>
+                    Criado em: {new Date(venda.criadoEm).toLocaleDateString('pt-BR')}
+                  </small>
+
+                  <small
+                    style={{
+                      fontSize: '13px',
+                      color: venda.status === 'Concluída' ? 'green' : 'red',
+                    }}
+                  >
+                    Situação: {venda.status}
+                  </small>
+
+                  {/* Exibir valor pendente se for uma venda pendente */}
+                  {venda.status === 'Pendente' && (
+                    <small style={{ fontSize: '12px', color: '#d33' }}>
+                      Valor Pendente: R$ {valorPendente.toFixed(2)}
+                    </small>
+                  )}
+                </div>
+
+                <div style={styles.botoesCard}>
+                  <button onClick={() => handleEditar(venda.id)} className="btn btn-primary btn-sm">
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleExcluir(venda.id)}
+                    className="btn btn-danger btn-sm"
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
 
       {/* Paginação */}

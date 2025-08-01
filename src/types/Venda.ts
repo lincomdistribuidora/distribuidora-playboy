@@ -10,6 +10,7 @@ export interface ProdutoVenda {
   produtoId: string;
   nome: string;
   quantidade: number;
+  preco: number;
   valorUnitario: number;
 }
 
