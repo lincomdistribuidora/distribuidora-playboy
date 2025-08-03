@@ -183,7 +183,7 @@ const Vendas = () => {
                     })}
                   </small>
                   <small style={{ fontSize: '12px', color: '#888' }}>
-                    Criado em: {new Date(venda.criadoEm).toLocaleDateString('pt-BR')}
+                    Criado em: {new Date(venda.criadoEm).toLocaleDateString('pt-BR')} {new Date(venda.criadoEm).toLocaleTimeString('pt-BR')}
                   </small>
 
                   <small
