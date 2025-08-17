@@ -10,7 +10,7 @@ import { doc, setDoc } from 'firebase/firestore';
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('lincom@email.com');
-  const [senha, setSenha] = useState('123456');
+  const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [nome, setNome] = useState('');
   const { setUser } = useUser();

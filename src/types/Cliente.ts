@@ -21,9 +21,10 @@ export interface Endereco {
 }
 
 export interface Cliente {
-  id: string;                   // Identificador único no banco
+  id?: string; // <- deixa opcional                 // Identificador único no banco
   nome: string;                 // Nome completo do cliente
   contatos: Contato[];          // Lista de contatos (telefone, email, etc.)
   endereco?: Endereco;          // Endereço do cliente (opcional)
   saldo: number;                // Saldo do cliente (obrigatório para evitar undefined)
+  criadoEm: string; // ou Date, se preferir
 }

@@ -1,4 +1,5 @@
 // src/pages/admin/Clientes.tsx
+export type ClienteSemId = Omit<Cliente, 'id'>;
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

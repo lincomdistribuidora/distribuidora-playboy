@@ -1,7 +1,7 @@
 // src/pages/admin/CadastrarVenda.tsx
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { colorAzul } from '../../values/colors';
 import Select from 'react-select';
 import { NumericFormat } from 'react-number-format';
@@ -16,11 +16,16 @@ import produtoRepository from '../../repositories/ProdutoRepository';
 import vendaRepository from '../../repositories/VendaRepository';
 import { v4 as uuidv4 } from 'uuid';
 
+
+
 const LIMITE_TOTAL_VENDA = 1200;
 
 const CadastrarVenda = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const location = useLocation();
+  const clienteInicial = location.state?.clienteSelecionado;
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [produtosDisponiveis, setProdutosDisponiveis] = useState<Produto[]>([]);
@@ -42,33 +47,33 @@ const CadastrarVenda = () => {
     criadoEm: new Date().toISOString(),
   });
 
+
+  const [valorCentavos, setValorCentavos] = useState('');
+
+
+  const formatarValor = (valor: string) => {
+    const numeros = valor.replace(/\D/g, '');
+    const centavos = (Number(numeros) / 100).toFixed(2);
+    return `R$ ${centavos.replace('.', ',')}`;
+  };
+
+
   // Carrega clientes e produtos apenas uma vez ao montar o componente
   useEffect(() => {
     clienteRepository.findAll().then(setClientes).catch(console.error);
     produtoRepository.findAll().then(setProdutosDisponiveis).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    if (clienteInicial) {
+      setClienteSelecionado(clienteInicial);
+      setVenda(prev => ({ ...prev, cliente: clienteInicial }));
+    }
+  }, [clienteInicial]);
+
   const [vendaOriginal, setVendaOriginal] = useState<Venda | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
 
-    const carregarVenda = async () => {
-      try {
-        const vendaData = await vendaRepository.findById(id);
-        if (vendaData) {
-          setVenda(vendaData);
-          setVendaOriginal(vendaData);  // Guarda a venda original para comparar
-          const clienteAtualizado = await clienteRepository.findById(vendaData.cliente.id);
-          if (clienteAtualizado) setClienteSelecionado(clienteAtualizado);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    carregarVenda();
-  }, [id]);
 
   const vendaAlterada = JSON.stringify(vendaOriginal) !== JSON.stringify(venda);
 
@@ -79,19 +84,26 @@ const CadastrarVenda = () => {
     const carregarVenda = async () => {
       try {
         const vendaData = await vendaRepository.findById(id);
-        console.log('Venda carregada:', vendaData);
-        if (vendaData) {
-          setVenda(vendaData);
+        if (!vendaData) return;
 
-          // Agora aguarda até que clientes estejam carregados para selecionar o cliente da venda
-          // Espera até que clientes.length > 0 para tentar achar o cliente
-          if (clientes.length > 0) {
-            const cliente = clientes.find(c => c.id === vendaData.cliente.id);
-            if (cliente) setClienteSelecionado(cliente);
+        setVenda(vendaData);
+        setVendaOriginal(vendaData); // Guarda a venda original para comparação
+
+        // Se você já tem os clientes carregados, seleciona direto
+        if (clientes.length > 0) {
+          const cliente = clientes.find(c => c.id === vendaData.cliente.id);
+          if (cliente) {
+            setClienteSelecionado(cliente);
+          }
+        } else {
+          // Se ainda não tem clientes, busca direto do repositório
+          const clienteAtualizado = await clienteRepository.findById(vendaData.cliente.id);
+          if (clienteAtualizado) {
+            setClienteSelecionado(clienteAtualizado);
           }
         }
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao carregar venda:', error);
       }
     };
 
@@ -225,7 +237,7 @@ const CadastrarVenda = () => {
       return;
     }
 
-    // 4. Verifique se o saldo do cliente ficará negativo após a venda
+    // 4. Verifique se o saldo do cliente ficará negativo após a venda // <p><strong>Saldo após Venda:</strong> R$ ${saldoFuturo.toFixed(2)}</p>
     if (saldoAposVenda < 0) {
       const result = await Swal.fire({
         icon: 'warning',
@@ -233,7 +245,6 @@ const CadastrarVenda = () => {
         html: `
         <p>O saldo do cliente ficará negativo após esta venda.</p>
         <p><strong>Nome:</strong> ${clienteSelecionado?.nome}</p>
-        <p><strong>Saldo após Venda:</strong> R$ ${saldoFuturo.toFixed(2)}</p>
         <p>Deseja continuar mesmo assim?</p>
       `,
         showCancelButton: true,
@@ -295,6 +306,45 @@ const CadastrarVenda = () => {
       });
     }
   };
+
+
+  const handleExcluirVenda = async () => {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'Excluir Venda',
+      text: 'Tem certeza que deseja excluir esta venda?',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, excluir',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: colorAzul,
+    });
+
+    if (!result.isConfirmed || !id) return;
+
+    try {
+      await vendaRepository.remove(id); // ou api.delete(`/vendas/${id}`), conforme seu repo
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Venda excluída com sucesso!',
+        confirmButtonColor: colorAzul,
+      });
+
+      // TODO: Não precisa desse venda, na verdade tem que voltar a tela anterior, verificar o fluxo
+      navigate('/vendas');
+    } catch (error) {
+      console.error('Erro ao excluir venda:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro ao excluir venda',
+        text: 'Não foi possível excluir a venda. Tente novamente.',
+        confirmButtonColor: '#d33',
+      });
+    }
+  };
+
+
   return (
     <div className="menu-responsivel">
       <div className="container mt-5 p-4" style={{ backgroundColor: '#fff', borderRadius: 8 }}>
@@ -307,16 +357,17 @@ const CadastrarVenda = () => {
             <Select
               value={clienteSelecionado ? { value: clienteSelecionado.id, label: clienteSelecionado.nome } : null}
               onChange={(opt) => {
-                const cliente = clientes.find(c => c.id === opt?.value);
-                if (cliente) {
-                  setClienteSelecionado(cliente);
-                  setVenda(prev => ({ ...prev, cliente }));
+                if (!clienteInicial) {
+                  const cliente = clientes.find(c => c.id === opt?.value);
+                  if (cliente) {
+                    setClienteSelecionado(cliente);
+                    setVenda(prev => ({ ...prev, cliente }));
+                  }
                 }
               }}
               options={clientes.map(c => ({ value: c.id, label: c.nome }))}
-              className="mt-2"
               placeholder="Selecione o cliente"
-              required
+              isDisabled={!!clienteInicial}
             />
             {clienteSelecionado && saldoClienteExibir !== 0 && (
               <div className="mt-2">
@@ -459,15 +510,17 @@ const CadastrarVenda = () => {
                 />
               </div>
               <div>
-                <NumericFormat
-                  value={pagamentoValor}
-                  onValueChange={(values) => setPagamentoValor(values.floatValue || 0)}
-                  prefix="R$ "
-                  decimalSeparator=","
-                  thousandSeparator="."
+                <input
+                  type="tel"
+                  inputMode="numeric"
                   className="form-control"
                   placeholder="Valor"
-                  allowNegative={false}
+                  value={formatarValor(valorCentavos)}
+                  onChange={(e) => {
+                    const novoValor = e.target.value.replace(/\D/g, '');
+                    setValorCentavos(novoValor);
+                    setPagamentoValor(Number(novoValor) / 100); // valor real em float
+                  }}
                 />
               </div>
               <button
@@ -512,12 +565,25 @@ const CadastrarVenda = () => {
           <button
             type="submit"
             className="btn btn-success mt-3"
-            disabled={!vendaAlterada || venda.produtos.length === 0}
+            disabled={
+              !vendaAlterada ||
+              (venda.produtos.length === 0 && venda.pagamentos.length === 0)
+            }
           >
             {venda.pagamentoRecebido >= parseFloat(venda.valor)
               ? 'Concluir Venda'
               : 'Salvar Venda Pendente'}
           </button>
+
+          {id && (
+            <button
+              type="button"
+              className="btn btn-danger mt-3"
+              onClick={handleExcluirVenda}
+            >
+              🗑️ Excluir Venda
+            </button>
+          )}
 
         </form>
       </div>
