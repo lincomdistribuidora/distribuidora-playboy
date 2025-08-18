@@ -196,7 +196,7 @@ const CadastrarCliente = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
+    // 1. Validação dos contatos
     const contatosPreenchidos = contatos.filter(c => c.tipo && c.valor);
 
     const contatosValidados = contatosPreenchidos.map((c) => {
@@ -205,18 +205,7 @@ const CadastrarCliente = () => {
       return { ...c, valor: valorFormatado, erro };
     });
 
-    const contatosValidos = cliente.contatos?.filter(c => c.tipo && c.valor && !validateContato(c.tipo, c.valor));
-
-    if (!contatosValidos || contatosValidos.length === 0) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'É necessário pelo menos um contato válido!',
-        confirmButtonColor: '#d33',
-      });
-      setContatos(contatosValidados);
-      return;
-    }
-
+    const contatosValidos = contatosValidados.filter(c => !c.erro);
 
     if (contatosValidos.length === 0) {
       await Swal.fire({
@@ -230,7 +219,8 @@ const CadastrarCliente = () => {
 
     setContatos(contatosValidados);
 
-    const cliente = {
+    // 2. Monta objeto cliente
+    const cliente: Cliente = {
       ...(id ? { id } : {}),
       nome,
       contatos: contatosValidos.map(({ tipo, valor }) => ({ tipo, valor })),
@@ -239,29 +229,11 @@ const CadastrarCliente = () => {
       criadoEm: new Date().toISOString(),
     };
 
+    // 3. Salva ou atualiza
     try {
       if (id) {
-        // edição
-        const cliente: Cliente = {
-          id,
-          nome,
-          contatos: contatosValidos.map(({ tipo, valor }) => ({ tipo, valor })),
-          endereco,
-          saldo,
-          criadoEm: new Date().toISOString(),
-        };
-
         await ClienteRepository.update(id, cliente);
       } else {
-        // novo cadastro (sem id)
-        const cliente: Cliente = {
-          nome,
-          contatos: contatosValidos.map(({ tipo, valor }) => ({ tipo, valor })),
-          endereco,
-          saldo,
-          criadoEm: new Date().toISOString(),
-        };
-
         await ClienteRepository.save(cliente);
       }
 
