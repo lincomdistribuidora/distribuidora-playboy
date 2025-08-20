@@ -4,7 +4,7 @@ import { colorAzul, colorBranco } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { NumericFormat } from 'react-number-format';
-import { PlusCircle, Contact } from 'lucide-react'; // Use 'Contact' ou 'Contacts'
+import { PlusCircle, Contact } from 'lucide-react'; // Corrigido para 'Contact'
 import { ptBR } from 'date-fns/locale';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
@@ -41,10 +41,31 @@ interface NavigatorWithContacts extends Navigator {
   };
 }
 
+// ============== NOVA FUNÇÃO PARA NORMALIZAR NÚMEROS DE TELEFONE ==============
+const normalizePhoneNumber = (rawNumber: string): string => {
+  // Remove todos os caracteres não numéricos
+  let cleanedNumber = rawNumber.replace(/\D/g, '');
+
+  // Se o número for maior que 11 dígitos, assumimos que ele contém prefixos
+  // (como código de país '55', ou '0' na frente do DDD, etc.)
+  // e pegamos apenas os últimos 11 dígitos.
+  // Isso é ideal para telefones celulares brasileiros (DD + 9 + 8 dígitos).
+  if (cleanedNumber.length > 11) {
+    return cleanedNumber.slice(-11);
+  }
+
+  // Para casos onde o número já tem 11 dígitos ou menos (ex: fixo com 8/9 dígitos,
+  // ou já limpo corretamente), retornamos como está.
+  return cleanedNumber;
+};
+// ===========================================================================
+
+
 const CadastrarCliente = () => {
-  const numMaximoDiasNoMes = 31;
+  const numMaximoDiasNoMes = 31; // Variável não utilizada, pode ser removida se não for usada em outro lugar.
   const navigate = useNavigate();
-  const [numDiasNoMes, setNumDiasNoMes] = useState(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]);
+  // numDiasNoMes também não parece ser utilizada diretamente, pode ser removida se não for usada em outro lugar.
+  const [numDiasNoMes, setNumDiasNoMes] = useState(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]); 
   const { id } = useParams();
 
   const [nome, setNome] = useState('');
@@ -63,28 +84,33 @@ const CadastrarCliente = () => {
   const [erroVendas, setErroVendas] = useState<string | null>(null);
   const [agrupado, setAgrupado] = useState<any>({});
 
-  const [canUseContactPicker, setCanUseContactPicker] = useState(false); // Novo estado
+  const [canUseContactPicker, setCanUseContactPicker] = useState(false);
 
-  // Adicionado para verificar se a Contact Picker API está disponível
+  // Efeito para verificar a disponibilidade da Contact Picker API ao carregar o componente
   useEffect(() => {
-    // Verifica se a API de Contatos está presente no navegador
-    // e se estamos em um ambiente que geralmente seria um celular (por exemplo, max-width)
-    // Uma verificação de user-agent seria mais robusta, mas essa é um bom começo.
     const navigatorWithContacts = navigator as NavigatorWithContacts;
-    if (navigatorWithContacts.contacts && window.isSecureContext) { // isSecureContext para garantir HTTPS
+    const isContactApiAvailable = !!navigatorWithContacts.contacts;
+    const isSecure = window.isSecureContext;
+
+    // Logs de depuração que podem ser removidos após confirmação de funcionamento
+    console.log("DEBUG: Checking Contact Picker API availability:");
+    console.log("navigator.contacts is available:", isContactApiAvailable);
+    console.log("window.isSecureContext is true:", isSecure);
+
+    if (isContactApiAvailable && isSecure) {
       setCanUseContactPicker(true);
     } else {
       setCanUseContactPicker(false);
     }
-  }, []);
+  }, []); // Array de dependências vazio para rodar apenas uma vez
 
   const buscarVendasDoCliente = async (clienteId: string): Promise<any[]> => {
     try {
       const vendasRef = collection(db, 'vendas');
       const q = query(vendasRef, where('cliente.id', '==', clienteId));
       const snapshot = await getDocs(q);
-      console.log("O valor de snapshot:")
-      console.log(snapshot)
+      // console.log("O valor de snapshot:") // Pode ser removido, era para depuração
+      // console.log(snapshot) // Pode ser removido, era para depuração
 
       if (snapshot.empty) return [];
 
@@ -113,7 +139,9 @@ const CadastrarCliente = () => {
   };
 
   const applyMask = (tipo: string, value: string): string => {
-    value = value.replace(/\D/g, '');
+    // Remove qualquer coisa que não seja dígito antes de aplicar a máscara.
+    // Isso garante que a máscara sempre comece de um número "limpo".
+    value = value.replace(/\D/g, ''); 
     if (tipo === 'Telefone' || tipo === 'WhatsApp') {
       if (value.length <= 2) return value.replace(/^(\d{0,2})/, '($1');
       else if (value.length <= 6) return value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
@@ -126,9 +154,7 @@ const CadastrarCliente = () => {
     if (!valor.trim()) return 'Campo obrigatório';
 
     if (tipo === 'Telefone' || tipo === 'WhatsApp') {
-      // Ajuste o regex para ser mais flexível antes de aplicar a máscara completa
-      // ou valide o formato final da máscara.
-      // Por enquanto, vou validar o formato completo que a máscara gera.
+      // Valida o formato final esperado após a aplicação da máscara.
       const telefoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
       return telefoneRegex.test(valor) ? '' : 'Telefone inválido (ex: (xx) xxxxx-xxxx)';
     }
@@ -141,32 +167,33 @@ const CadastrarCliente = () => {
     return '';
   };
 
-  // Função para verificar duplicidade no Firestore
+  // Função para verificar duplicidade de contato no Firestore
   const verificarDuplicidadeContato = async (tipo: string, valor: string): Promise<Cliente | null> => {
     try {
       const clientesRef = collection(db, 'clientes');
+      // Busca por um cliente que tenha um contato com o mesmo tipo e valor
       const q = query(clientesRef, where('contatos', 'array-contains', { tipo, valor }));
       const snapshot = await getDocs(q);
 
       if (!snapshot.empty) {
-        // Retorna o primeiro cliente encontrado com aquele contato
+        // Se encontrar, retorna o primeiro cliente correspondente
         return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Cliente;
       }
-      return null;
+      return null; // Nenhum cliente duplicado encontrado
     } catch (error) {
       console.error('Erro ao verificar duplicidade de contato:', error);
       return null;
     }
   };
 
-  // Novo: Função para importar contatos da agenda
+  // Função para importar contatos da agenda do dispositivo
   const handleImportContacts = async () => {
     const navigatorWithContacts = navigator as NavigatorWithContacts;
     if (!navigatorWithContacts.contacts) {
       Swal.fire({
         icon: 'info',
         title: 'Funcionalidade não disponível',
-        text: 'A importação de contatos da agenda só funciona em navegadores mobile que suportam essa função (ex: Chrome no Android).',
+        text: 'A importação de contatos da agenda só funciona em navegadores mobile que suportam essa função (ex: Chrome no Android) e em um ambiente seguro (HTTPS).',
         confirmButtonColor: colorAzul,
       });
       return;
@@ -175,27 +202,30 @@ const CadastrarCliente = () => {
     try {
       // Solicita ao usuário a seleção de contatos
       const selectedContacts = await navigatorWithContacts.contacts.select(
-        ['name', 'email', 'tel'],
-        { multiple: false } // Para simplificar, permite apenas um contato por vez
+        ['name', 'email', 'tel'], // Propriedades que queremos dos contatos
+        { multiple: false } // Permite ao usuário selecionar apenas um contato por vez
       );
 
       if (selectedContacts.length === 0) {
         return; // Usuário cancelou a seleção
       }
 
-      const contact = selectedContacts[0]; // Pega o primeiro contato selecionado
+      const contact = selectedContacts[0]; // Pega o primeiro (e único) contato selecionado
 
-      // Tenta preencher o nome do cliente se estiver vazio
+      // Tenta preencher o nome do cliente se o campo estiver vazio
       if (!nome.trim() && contact.name && contact.name.length > 0) {
         setNome(contact.name[0]);
       }
 
-      const newContactsToAdd: Contato[] = [];
+      const newContactsToAdd: Contato[] = []; // Array para armazenar os novos contatos a serem adicionados
 
-      // Processa números de telefone
+      // Processa os números de telefone do contato selecionado
       if (contact.tel && contact.tel.length > 0) {
         for (const tel of contact.tel) {
-          const formattedTel = applyMask('Telefone', tel); // Aplica a máscara
+          const normalizedTel = normalizePhoneNumber(tel); // Normaliza o número antes de tudo!
+          const formattedTel = applyMask('Telefone', normalizedTel); // Aplica a máscara no número normalizado
+
+          // Verifica duplicidade no Firestore para o telefone formatado
           const isDuplicate = await verificarDuplicidadeContato('Telefone', formattedTel);
           if (isDuplicate) {
             const result = await Swal.fire({
@@ -225,9 +255,10 @@ const CadastrarCliente = () => {
         }
       }
 
-      // Processa e-mails
+      // Processa os e-mails do contato selecionado
       if (contact.email && contact.email.length > 0) {
         for (const email of contact.email) {
+          // Verifica duplicidade no Firestore para o e-mail
           const isDuplicate = await verificarDuplicidadeContato('E-mail', email);
           if (isDuplicate) {
             const result = await Swal.fire({
@@ -257,16 +288,17 @@ const CadastrarCliente = () => {
         }
       }
 
-      // Adiciona os novos contatos ao estado, filtrando vazios iniciais se existirem
+      // Atualiza o estado dos contatos no formulário
       setContatos(prevContatos => {
-        const filteredPrevContatos = prevContatos.filter(c => c.tipo || c.valor); // Remove o campo vazio inicial, se houver
+        // Filtra quaisquer campos de contato vazios que não foram preenchidos
+        const filteredPrevContatos = prevContatos.filter(c => c.tipo || c.valor.trim()); 
         return [...filteredPrevContatos, ...newContactsToAdd];
       });
 
     } catch (error: any) {
       console.error('Erro ao importar contatos:', error);
       if (error.name === 'AbortError') {
-        // Usuário cancelou a seleção
+        // Quando o usuário cancela a seleção de contatos
         console.log('Seleção de contatos cancelada pelo usuário.');
       } else if (error.name === 'SecurityError') {
         Swal.fire({
@@ -287,20 +319,22 @@ const CadastrarCliente = () => {
   };
 
 
+  // Efeito para carregar dados do cliente e histórico de vendas ao editar
   useEffect(() => {
     const carregarClienteEHistorico = async () => {
-      if (!id) return;
+      if (!id) return; // Se não há ID, não estamos editando
 
       try {
         const cliente = await ClienteRepository.findById(id);
         if (cliente) {
           setNome(cliente.nome || '');
-          // Garante que contatos é um array, se for undefined ou null, inicializa como vazio
+          // Garante que 'contatos' é um array e mapeia para o formato do estado,
+          // adicionando um campo vazio se não houver contatos.
           setContatos(cliente.contatos?.map((c: any) => ({
             tipo: c.tipo || '',
             valor: c.valor || '',
             erro: validateContato(c.tipo || '', c.valor || '')
-          })) || [{ tipo: '', valor: '', erro: '' }]); // Adiciona um campo vazio se não houver contatos
+          })) || [{ tipo: '', valor: '', erro: '' }]);
           setSaldo(Number(cliente.saldo || 0));
 
           const vendasDoCliente = await buscarVendasDoCliente(id);
@@ -309,7 +343,7 @@ const CadastrarCliente = () => {
           setAgrupado(agruparVendasPorData(vendasDoCliente));
         }
       } catch (err: any) {
-        console.error('Erro geral:', err);
+        console.error('Erro geral ao carregar cliente:', err);
         if (err.message === 'timeout') {
           setErroVendas('Tempo de conexão excedido. Tente novamente.');
         } else {
@@ -319,16 +353,18 @@ const CadastrarCliente = () => {
     };
 
     carregarClienteEHistorico();
-  }, [id]);
+  }, [id]); // Dependência do ID para recarregar quando o ID da rota mudar
 
+  // Adiciona um novo campo de contato vazio ao formulário
   const handleAddContato = () => {
     setContatos([...contatos, { tipo: '', valor: '', erro: '' }]);
   };
 
+  // Remove um campo de contato específico do formulário
   const handleRemoveContato = (index: number) => {
     const updated = [...contatos];
     updated.splice(index, 1);
-    // Se remover todos os contatos, adicione um campo vazio para evitar tela em branco
+    // Garante que sempre haja pelo menos um campo de contato no formulário
     if (updated.length === 0) {
       setContatos([{ tipo: '', valor: '', erro: '' }]);
     } else {
@@ -336,14 +372,16 @@ const CadastrarCliente = () => {
     }
   };
 
+  // Lida com a mudança do tipo de contato (Telefone, E-mail, WhatsApp)
   const handleTipoChange = (index: number, value: string) => {
     const updated = [...contatos];
     updated[index].tipo = value;
-    updated[index].valor = '';
-    updated[index].erro = 'Campo obrigatório'; // Reinicia o erro
+    updated[index].valor = ''; // Limpa o valor ao mudar o tipo
+    updated[index].erro = 'Campo obrigatório'; // Define erro inicial
     setContatos(updated);
   };
 
+  // Lida com a mudança do valor do contato, aplicando máscara e validação
   const handleContatoChange = (index: number, value: string) => {
     const updated = [...contatos];
     const tipo = updated[index].tipo;
@@ -357,10 +395,11 @@ const CadastrarCliente = () => {
     setContatos(updated);
   };
 
+  // Lida com o envio do formulário de cliente
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Validação dos contatos
+    // 1. Validação e formatação dos contatos
     // Filtra para pegar apenas os contatos que têm tipo E valor preenchidos
     const contatosPreenchidos = contatos.filter(c => c.tipo && c.valor.trim());
 
@@ -371,7 +410,7 @@ const CadastrarCliente = () => {
       return { ...c, valor: valorFormatado, erro };
     });
 
-    // Verifica se algum contato válido é necessário
+    // Verifica se há erros de validação visíveis nos contatos
     if (contatosValidados.some(c => c.erro)) {
       await Swal.fire({
         icon: 'warning',
@@ -382,6 +421,7 @@ const CadastrarCliente = () => {
       return;
     }
 
+    // Se nenhum contato preenchido/válido após a validação
     if (contatosValidados.length === 0) {
       await Swal.fire({
         icon: 'warning',
@@ -390,22 +430,21 @@ const CadastrarCliente = () => {
       });
       return;
     }
-
-    // A partir daqui, `contatosValidados` contém apenas contatos válidos e sem erros visíveis
-    // No entanto, para o objeto final do cliente, queremos apenas o tipo e o valor
+    
+    // Mapeia para o formato final a ser salvo no Firestore (apenas tipo e valor)
     const contatosParaSalvar = contatosValidados.map(({ tipo, valor }) => ({ tipo, valor }));
 
-    // 2. Monta objeto cliente
+    // 2. Monta o objeto cliente
     const cliente: Cliente = {
-      ...(id ? { id } : {}),
+      ...(id ? { id } : {}), // Inclui o ID se estiver editando
       nome,
-      contatos: contatosParaSalvar, // Usa os contatos já validados e formatados
+      contatos: contatosParaSalvar,
       endereco,
       saldo,
-      criadoEm: new Date().toISOString(), // ou adicione uma condição para update
+      criadoEm: new Date().toISOString(), // Grava a data de criação/última atualização
     };
 
-    // 3. Salva ou atualiza
+    // 3. Salva ou atualiza o cliente no Firestore
     try {
       if (id) {
         await ClienteRepository.update(id, cliente);
@@ -419,7 +458,7 @@ const CadastrarCliente = () => {
         confirmButtonColor: colorAzul,
       });
 
-      navigate('/clientes', { replace: true });
+      navigate('/clientes', { replace: true }); // Redireciona para a lista de clientes
     } catch (error) {
       console.error(error);
       await Swal.fire({
@@ -431,6 +470,7 @@ const CadastrarCliente = () => {
     }
   };
 
+  // Calcula totais de vendas para exibição no histórico
   const calcularTotaisVenda = (venda: Venda) => {
     const totalProdutos = venda.produtos?.reduce((acc, p) => {
       const preco = Number(p.valorUnitario || 0);
@@ -493,7 +533,7 @@ const CadastrarCliente = () => {
                 )}
               </div>
             ))}
-            <div className="d-flex gap-2 mt-2"> {/* Novo div para os botões */}
+            <div className="d-flex gap-2 mt-2">
               <button
                 type="button"
                 onClick={handleAddContato}
@@ -502,21 +542,19 @@ const CadastrarCliente = () => {
               >
                 Adicionar Contato
               </button>
-              
-              {canUseContactPicker && ( // Renderiza o botão condicionalmente
+              {canUseContactPicker && ( // Renderiza o botão de importação condicionalmente
                 <button
                   type="button"
                   onClick={handleImportContacts}
                   className="btn btn-sm btn-primary d-flex align-items-center gap-1"
                 >
-                  <Contact size={18} /> // Use o ícone 'Contact'
+                  <Contact size={18} /> Importar da Agenda
                 </button>
               )}
             </div>
           </div>
 
-          {/* ... restante do formulário (saldo, endereço, histórico de vendas) ... */}
-
+          {/* Seção de Saldo com o Cliente */}
           <div className="mt-3">
             <label>Saldo com o cliente:</label>
             <div className="d-flex gap-2">
@@ -547,12 +585,13 @@ const CadastrarCliente = () => {
               />
             </div>
             <div className="mt-1">
-              {saldo < 0 && <span className="text-danger">💸 Cliente deve R$ {saldo.toFixed(2)}</span>}
-              {saldo > 0 && <span className="text-success">💰 Cliente tem crédito de R$ {Math.abs(saldo.toFixed(2))}</span>}
+              {saldo < 0 && <span className="text-danger">💸 Cliente deve R$ {saldo.toFixed(2).replace('.', ',')}</span>}
+              {saldo > 0 && <span className="text-success">💰 Cliente tem crédito de R$ {Math.abs(saldo).toFixed(2).replace('.', ',')}</span>}
               {saldo === 0 && <span className="text-muted">Cliente sem saldo pendente</span>}
             </div>
           </div>
 
+          {/* Seção de Histórico do Cliente (Vendas) */}
           <div className='historicoClienteComponent mt-5'>
             <h1 className='bg-light shadow-sm d-flex justify-content-between align-items-center p-3 sticky-top'>
               Histórico do cliente
@@ -576,10 +615,11 @@ const CadastrarCliente = () => {
                       <summary className="fw-bold">{mes}</summary>
                       <ul className="list-group mt-2">
                         {Object.entries(dias)
-                          .sort(([a], [b]) => Number(b) - Number(a))
+                          .sort(([a], [b]) => Number(b) - Number(a)) // Ordena dias em ordem decrescente
                           .map(([dia, vendasDoDia]) => {
                             const vendas = vendasDoDia as Venda[];
 
+                            // Ordena vendas do dia por horário decrescente
                             const vendasOrdenadas = [...vendas].sort((a, b) => {
                               const horaA = parseISO(a.criadoEm).getTime();
                               const horaB = parseISO(b.criadoEm).getTime();
@@ -594,14 +634,14 @@ const CadastrarCliente = () => {
                             const corFundo = saldoDia === 0
                               ? 'white'
                               : saldoDia > 0
-                                ? '#e6ffe6'
-                                : '#ffe6e6';
+                                ? '#e6ffe6' // Verde claro para saldo positivo
+                                : '#ffe6e6'; // Vermelho claro para saldo negativo
 
                             const corTexto = saldoDia === 0
                               ? '#333'
                               : saldoDia > 0
-                                ? '#006400'
-                                : '#8B0000';
+                                ? '#006400' // Verde escuro para saldo positivo
+                                : '#8B0000'; // Vermelho escuro para saldo negativo
 
                             return (
                               <li
@@ -637,7 +677,7 @@ const CadastrarCliente = () => {
                                                   : 'red'
                                           }}
                                         >
-                                          - às {horaVenda} | Total: R$ {totalProdutos.toFixed(2)} | Pago: R$ {totalPago.toFixed(2)} | Saldo: R$ {saldo.toFixed(2)}
+                                          - às {horaVenda} | Total: R$ {totalProdutos.toFixed(2).replace('.', ',')} | Pago: R$ {totalPago.toFixed(2).replace('.', ',')} | Saldo: R$ {saldo.toFixed(2).replace('.', ',')}
                                         </span>
                                         <button
                                           type="button"
@@ -661,6 +701,7 @@ const CadastrarCliente = () => {
             )}
           </div>
 
+          {/* Botões de Ação do Formulário */}
           <div className="mt-4 d-flex gap-2">
             <button type="submit" className="btn btn-success">
               {id ? 'Salvar Alterações' : 'Salvar Cliente'}
