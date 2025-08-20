@@ -1,18 +1,13 @@
-// src/pages/cliente/CadastrarCliente.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { colorAzul, colorBranco } from '../../values/colors';
 import ClienteRepository from '../../repositories/ClienteRepository';
 import Swal from 'sweetalert2';
 import { NumericFormat } from 'react-number-format';
-import { PlusCircle } from 'lucide-react';
-
+import { PlusCircle, Contact } from 'lucide-react'; // Use 'Contact' ou 'Contacts'
 import { ptBR } from 'date-fns/locale';
-
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../firebaseConfig'; // ajuste o caminho se necessário
-
+import { db } from '../../firebaseConfig';
 import { parseISO, format } from 'date-fns';
 
 interface Contato {
@@ -23,8 +18,6 @@ interface Contato {
 
 import { Venda } from '../../types/Venda';
 import { Cliente } from '../../types/Cliente';
-
-
 
 const mesesTraduzidos: Record<string, string> = {
   January: 'Janeiro',
@@ -41,14 +34,17 @@ const mesesTraduzidos: Record<string, string> = {
   December: 'Dezembro',
 };
 
+// Interface para Contacts API (para TypeScript, caso não esteja global)
+interface NavigatorWithContacts extends Navigator {
+  contacts?: {
+    select(properties: string[], options: { multiple: boolean }): Promise<any[]>;
+  };
+}
+
 const CadastrarCliente = () => {
-
-  const numMaximoDiasNoMes = 31
-
+  const numMaximoDiasNoMes = 31;
   const navigate = useNavigate();
-
-  const [numDiasNoMes, setNumDiasNoMes] = useState(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"])
-
+  const [numDiasNoMes, setNumDiasNoMes] = useState(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]);
   const { id } = useParams();
 
   const [nome, setNome] = useState('');
@@ -62,13 +58,25 @@ const CadastrarCliente = () => {
     cep: '',
   });
 
-  const [saldo, setSaldo] = useState(0); // Saldo positivo (débito) ou negativo (crédito)
-
-
-
+  const [saldo, setSaldo] = useState(0);
   const [vendas, setVendas] = useState<Venda[]>([]);
   const [erroVendas, setErroVendas] = useState<string | null>(null);
   const [agrupado, setAgrupado] = useState<any>({});
+
+  const [canUseContactPicker, setCanUseContactPicker] = useState(false); // Novo estado
+
+  // Adicionado para verificar se a Contact Picker API está disponível
+  useEffect(() => {
+    // Verifica se a API de Contatos está presente no navegador
+    // e se estamos em um ambiente que geralmente seria um celular (por exemplo, max-width)
+    // Uma verificação de user-agent seria mais robusta, mas essa é um bom começo.
+    const navigatorWithContacts = navigator as NavigatorWithContacts;
+    if (navigatorWithContacts.contacts && window.isSecureContext) { // isSecureContext para garantir HTTPS
+      setCanUseContactPicker(true);
+    } else {
+      setCanUseContactPicker(false);
+    }
+  }, []);
 
   const buscarVendasDoCliente = async (clienteId: string): Promise<any[]> => {
     try {
@@ -90,7 +98,7 @@ const CadastrarCliente = () => {
   const agruparVendasPorData = (vendas: any[]) => {
     const agrupado: Record<string, Record<string, Record<string, any[]>>> = {};
     vendas.forEach(venda => {
-      if (!venda.criadoEm) return; // pula vendas sem data
+      if (!venda.criadoEm) return;
       const data = parseISO(venda.criadoEm);
       const ano = format(data, 'yyyy');
       const capitalizar = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -118,8 +126,11 @@ const CadastrarCliente = () => {
     if (!valor.trim()) return 'Campo obrigatório';
 
     if (tipo === 'Telefone' || tipo === 'WhatsApp') {
+      // Ajuste o regex para ser mais flexível antes de aplicar a máscara completa
+      // ou valide o formato final da máscara.
+      // Por enquanto, vou validar o formato completo que a máscara gera.
       const telefoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
-      return telefoneRegex.test(valor) ? '' : 'Telefone inválido';
+      return telefoneRegex.test(valor) ? '' : 'Telefone inválido (ex: (xx) xxxxx-xxxx)';
     }
 
     if (tipo === 'E-mail') {
@@ -130,7 +141,150 @@ const CadastrarCliente = () => {
     return '';
   };
 
+  // Função para verificar duplicidade no Firestore
+  const verificarDuplicidadeContato = async (tipo: string, valor: string): Promise<Cliente | null> => {
+    try {
+      const clientesRef = collection(db, 'clientes');
+      const q = query(clientesRef, where('contatos', 'array-contains', { tipo, valor }));
+      const snapshot = await getDocs(q);
 
+      if (!snapshot.empty) {
+        // Retorna o primeiro cliente encontrado com aquele contato
+        return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Cliente;
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro ao verificar duplicidade de contato:', error);
+      return null;
+    }
+  };
+
+  // Novo: Função para importar contatos da agenda
+  const handleImportContacts = async () => {
+    const navigatorWithContacts = navigator as NavigatorWithContacts;
+    if (!navigatorWithContacts.contacts) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Funcionalidade não disponível',
+        text: 'A importação de contatos da agenda só funciona em navegadores mobile que suportam essa função (ex: Chrome no Android).',
+        confirmButtonColor: colorAzul,
+      });
+      return;
+    }
+
+    try {
+      // Solicita ao usuário a seleção de contatos
+      const selectedContacts = await navigatorWithContacts.contacts.select(
+        ['name', 'email', 'tel'],
+        { multiple: false } // Para simplificar, permite apenas um contato por vez
+      );
+
+      if (selectedContacts.length === 0) {
+        return; // Usuário cancelou a seleção
+      }
+
+      const contact = selectedContacts[0]; // Pega o primeiro contato selecionado
+
+      // Tenta preencher o nome do cliente se estiver vazio
+      if (!nome.trim() && contact.name && contact.name.length > 0) {
+        setNome(contact.name[0]);
+      }
+
+      const newContactsToAdd: Contato[] = [];
+
+      // Processa números de telefone
+      if (contact.tel && contact.tel.length > 0) {
+        for (const tel of contact.tel) {
+          const formattedTel = applyMask('Telefone', tel); // Aplica a máscara
+          const isDuplicate = await verificarDuplicidadeContato('Telefone', formattedTel);
+          if (isDuplicate) {
+            const result = await Swal.fire({
+              icon: 'warning',
+              title: 'Contato duplicado!',
+              html: `O telefone <strong>${formattedTel}</strong> já pertence ao cliente <strong>${isDuplicate.nome}</strong>. Deseja adicionar mesmo assim?`,
+              showCancelButton: true,
+              confirmButtonText: 'Sim, adicionar',
+              cancelButtonText: 'Não, cancelar',
+              confirmButtonColor: colorAzul,
+              cancelButtonColor: '#d33',
+            });
+            if (result.isConfirmed) {
+              newContactsToAdd.push({
+                tipo: 'Telefone',
+                valor: formattedTel,
+                erro: validateContato('Telefone', formattedTel),
+              });
+            }
+          } else {
+            newContactsToAdd.push({
+              tipo: 'Telefone',
+              valor: formattedTel,
+              erro: validateContato('Telefone', formattedTel),
+            });
+          }
+        }
+      }
+
+      // Processa e-mails
+      if (contact.email && contact.email.length > 0) {
+        for (const email of contact.email) {
+          const isDuplicate = await verificarDuplicidadeContato('E-mail', email);
+          if (isDuplicate) {
+            const result = await Swal.fire({
+              icon: 'warning',
+              title: 'Contato duplicado!',
+              html: `O e-mail <strong>${email}</strong> já pertence ao cliente <strong>${isDuplicate.nome}</strong>. Deseja adicionar mesmo assim?`,
+              showCancelButton: true,
+              confirmButtonText: 'Sim, adicionar',
+              cancelButtonText: 'Não, cancelar',
+              confirmButtonColor: colorAzul,
+              cancelButtonColor: '#d33',
+            });
+            if (result.isConfirmed) {
+              newContactsToAdd.push({
+                tipo: 'E-mail',
+                valor: email,
+                erro: validateContato('E-mail', email),
+              });
+            }
+          } else {
+            newContactsToAdd.push({
+              tipo: 'E-mail',
+              valor: email,
+              erro: validateContato('E-mail', email),
+            });
+          }
+        }
+      }
+
+      // Adiciona os novos contatos ao estado, filtrando vazios iniciais se existirem
+      setContatos(prevContatos => {
+        const filteredPrevContatos = prevContatos.filter(c => c.tipo || c.valor); // Remove o campo vazio inicial, se houver
+        return [...filteredPrevContatos, ...newContactsToAdd];
+      });
+
+    } catch (error: any) {
+      console.error('Erro ao importar contatos:', error);
+      if (error.name === 'AbortError') {
+        // Usuário cancelou a seleção
+        console.log('Seleção de contatos cancelada pelo usuário.');
+      } else if (error.name === 'SecurityError') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro de segurança',
+          text: 'A importação de contatos requer um ambiente seguro (HTTPS) e permissão do usuário.',
+          confirmButtonColor: '#d33',
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao importar',
+          text: 'Não foi possível importar contatos. Verifique as permissões.',
+          confirmButtonColor: '#d33',
+        });
+      }
+    }
+  };
 
 
   useEffect(() => {
@@ -141,7 +295,12 @@ const CadastrarCliente = () => {
         const cliente = await ClienteRepository.findById(id);
         if (cliente) {
           setNome(cliente.nome || '');
-          // ... outros campos
+          // Garante que contatos é um array, se for undefined ou null, inicializa como vazio
+          setContatos(cliente.contatos?.map((c: any) => ({
+            tipo: c.tipo || '',
+            valor: c.valor || '',
+            erro: validateContato(c.tipo || '', c.valor || '')
+          })) || [{ tipo: '', valor: '', erro: '' }]); // Adiciona um campo vazio se não houver contatos
           setSaldo(Number(cliente.saldo || 0));
 
           const vendasDoCliente = await buscarVendasDoCliente(id);
@@ -169,14 +328,19 @@ const CadastrarCliente = () => {
   const handleRemoveContato = (index: number) => {
     const updated = [...contatos];
     updated.splice(index, 1);
-    setContatos(updated);
+    // Se remover todos os contatos, adicione um campo vazio para evitar tela em branco
+    if (updated.length === 0) {
+      setContatos([{ tipo: '', valor: '', erro: '' }]);
+    } else {
+      setContatos(updated);
+    }
   };
 
   const handleTipoChange = (index: number, value: string) => {
     const updated = [...contatos];
     updated[index].tipo = value;
     updated[index].valor = '';
-    updated[index].erro = 'Campo obrigatório';
+    updated[index].erro = 'Campo obrigatório'; // Reinicia o erro
     setContatos(updated);
   };
 
@@ -197,36 +361,48 @@ const CadastrarCliente = () => {
     e.preventDefault();
 
     // 1. Validação dos contatos
-    const contatosPreenchidos = contatos.filter(c => c.tipo && c.valor);
+    // Filtra para pegar apenas os contatos que têm tipo E valor preenchidos
+    const contatosPreenchidos = contatos.filter(c => c.tipo && c.valor.trim());
 
+    // Re-valida e formata os contatos preenchidos
     const contatosValidados = contatosPreenchidos.map((c) => {
       const valorFormatado = applyMask(c.tipo, c.valor);
       const erro = validateContato(c.tipo, valorFormatado);
       return { ...c, valor: valorFormatado, erro };
     });
 
-    const contatosValidos = contatosValidados.filter(c => !c.erro);
+    // Verifica se algum contato válido é necessário
+    if (contatosValidados.some(c => c.erro)) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Corrija os erros nos contatos!',
+        confirmButtonColor: '#d33',
+      });
+      setContatos(contatosValidados); // Atualiza para mostrar os erros na UI
+      return;
+    }
 
-    if (contatosValidos.length === 0) {
+    if (contatosValidados.length === 0) {
       await Swal.fire({
         icon: 'warning',
         title: 'É necessário pelo menos um contato válido!',
         confirmButtonColor: '#d33',
       });
-      setContatos(contatosValidados);
       return;
     }
 
-    setContatos(contatosValidados);
+    // A partir daqui, `contatosValidados` contém apenas contatos válidos e sem erros visíveis
+    // No entanto, para o objeto final do cliente, queremos apenas o tipo e o valor
+    const contatosParaSalvar = contatosValidados.map(({ tipo, valor }) => ({ tipo, valor }));
 
     // 2. Monta objeto cliente
     const cliente: Cliente = {
       ...(id ? { id } : {}),
       nome,
-      contatos: contatosValidos.map(({ tipo, valor }) => ({ tipo, valor })),
+      contatos: contatosParaSalvar, // Usa os contatos já validados e formatados
       endereco,
       saldo,
-      criadoEm: new Date().toISOString(),
+      criadoEm: new Date().toISOString(), // ou adicione uma condição para update
     };
 
     // 3. Salva ou atualiza
@@ -254,7 +430,6 @@ const CadastrarCliente = () => {
       });
     }
   };
-
 
   const calcularTotaisVenda = (venda: Venda) => {
     const totalProdutos = venda.produtos?.reduce((acc, p) => {
@@ -318,15 +493,29 @@ const CadastrarCliente = () => {
                 )}
               </div>
             ))}
-            <button
-              type="button"
-              onClick={handleAddContato}
-              className="btn btn-sm mt-2"
-              style={{ backgroundColor: colorAzul, color: colorBranco }}
-            >
-              Adicionar Contato
-            </button>
+            <div className="d-flex gap-2 mt-2"> {/* Novo div para os botões */}
+              <button
+                type="button"
+                onClick={handleAddContato}
+                className="btn btn-sm"
+                style={{ backgroundColor: colorAzul, color: colorBranco }}
+              >
+                Adicionar Contato
+              </button>
+              
+              {canUseContactPicker && ( // Renderiza o botão condicionalmente
+                <button
+                  type="button"
+                  onClick={handleImportContacts}
+                  className="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                >
+                  <Contact size={18} /> // Use o ícone 'Contact'
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* ... restante do formulário (saldo, endereço, histórico de vendas) ... */}
 
           <div className="mt-3">
             <label>Saldo com o cliente:</label>
@@ -387,11 +576,10 @@ const CadastrarCliente = () => {
                       <summary className="fw-bold">{mes}</summary>
                       <ul className="list-group mt-2">
                         {Object.entries(dias)
-                          .sort(([a], [b]) => Number(b) - Number(a)) // dias em ordem decrescente
+                          .sort(([a], [b]) => Number(b) - Number(a))
                           .map(([dia, vendasDoDia]) => {
                             const vendas = vendasDoDia as Venda[];
 
-                            // ✅ Ordena por horário decrescente
                             const vendasOrdenadas = [...vendas].sort((a, b) => {
                               const horaA = parseISO(a.criadoEm).getTime();
                               const horaB = parseISO(b.criadoEm).getTime();
