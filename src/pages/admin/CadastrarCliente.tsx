@@ -121,7 +121,7 @@ const CadastrarCliente = () => {
   };
 
   const applyMask = (tipo: string, value: string): string => {
-    value = value.replace(/\D/g, ''); 
+    value = value.replace(/\D/g, '');
     if (tipo === 'Telefone' || tipo === 'WhatsApp') {
       if (value.length <= 2) return value.replace(/^(\d{0,2})/, '($1');
       else if (value.length <= 6) return value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
@@ -388,7 +388,7 @@ const CadastrarCliente = () => {
       });
       return;
     }
-    
+
     const contatosParaSalvar = contatosValidados.map(({ tipo, valor }) => ({ tipo, valor }));
 
     const cliente: Cliente = {
@@ -483,7 +483,7 @@ const CadastrarCliente = () => {
                       value={contato.valor}
                       onChange={(e) => handleContatoChange(index, e.target.value)}
                       className={`form-control ${contato.erro && contato.valor.trim() !== '' ? 'is-invalid' : ''}`}
-                      // O erro só aparece se o tipo foi selecionado e o valor não está vazio
+                    // O erro só aparece se o tipo foi selecionado e o valor não está vazio
                     />
                   )}
                   {contatos.length > 1 && (
@@ -559,6 +559,7 @@ const CadastrarCliente = () => {
             <h1 className='bg-light shadow-sm d-flex justify-content-between align-items-center p-3 sticky-top'>
               Histórico do cliente
               <button
+                type="button"
                 className="btn btn-primary d-flex align-items-center gap-2"
                 onClick={() => navigate('/cadastrar-venda', { state: { clienteSelecionado: { id, nome, contatos, saldo } } })}
               >
